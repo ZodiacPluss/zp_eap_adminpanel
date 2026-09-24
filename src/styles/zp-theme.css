@@ -1,0 +1,150 @@
+/**
+ * ZodiacPluss admin theme.
+ *
+ * The `--zp-*` values below are the statically-rendered light theme, used for
+ * the very first paint. `applyPalette()` (see app/theme/palette.js) overwrites
+ * them on <html> from the same JS palette that inline styles and recharts read,
+ * so there is exactly one set of colours per theme.
+ */
+
+:root {
+  --zp-bg: #f1f5f9;
+  --zp-card: #ffffff;
+  --zp-surface: #f8fafc;
+  --zp-sidebar: #ffffff;
+  --zp-header: rgba(241, 245, 249, 0.92);
+  --zp-overlay: rgba(12, 27, 51, 0.45);
+  --zp-hover: #f8fafc;
+  --zp-navy: #0c1b33;
+  --zp-slate: #64748b;
+  --zp-slate-light: #94a3b8;
+  --zp-border: rgba(12, 27, 51, 0.07);
+  --zp-border-strong: #e2e8f0;
+  --zp-teal: #0891b2;
+  --zp-teal-dark: #0e7490;
+  --zp-teal-light: #e0f2fe;
+  --zp-brand: #0d9da8;
+  --zp-brand-deep: #087b82;
+  --zp-brand-soft: #e6f4f0;
+  --zp-emerald: #10b981;
+  --zp-amber: #f59e0b;
+  --zp-violet: #8b5cf6;
+  --zp-rose: #ef4444;
+  --zp-on-accent: #ffffff;
+  --zp-grid: #f1f5f9;
+  --zp-shadow: rgba(12, 27, 51, 0.08);
+
+  /* Login-screen ambience, the one place with its own scenery. */
+  --zp-auth-bg: linear-gradient(135deg, #edf9f7 0%, #f5fbfb 52%, #eef7fb 100%);
+  --zp-auth-blob-a: rgba(199, 238, 234, 0.7);
+  --zp-auth-blob-b: rgba(216, 238, 248, 0.8);
+  --zp-auth-grid: rgba(13, 157, 168, 0.06);
+  --zp-auth-field: #fbfdfd;
+  --zp-auth-chip: #eaf8f6;
+  --zp-auth-chip-text: #147a82;
+}
+
+.dark {
+  --zp-bg: #0a0a0b;
+  --zp-card: #141416;
+  --zp-surface: #1c1c1f;
+  --zp-sidebar: #0e0e10;
+  --zp-header: rgba(10, 10, 11, 0.92);
+  --zp-overlay: rgba(0, 0, 0, 0.66);
+  --zp-hover: #26262a;
+  --zp-navy: #ededef;
+  --zp-slate: #b2b2b8;
+  --zp-slate-light: #86868d;
+  --zp-border: rgba(255, 255, 255, 0.1);
+  --zp-border-strong: rgba(255, 255, 255, 0.2);
+  --zp-teal: #22c0d6;
+  --zp-teal-dark: #1a93a6;
+  --zp-teal-light: #173338;
+  --zp-brand: #22c7d4;
+  --zp-brand-deep: #7fe6ee;
+  --zp-brand-soft: #16211f;
+  --zp-emerald: #34d399;
+  --zp-amber: #fbbf24;
+  --zp-violet: #a78bfa;
+  --zp-rose: #f87171;
+  --zp-on-accent: #0a0a0b;
+  --zp-grid: rgba(255, 255, 255, 0.09);
+  --zp-shadow: rgba(0, 0, 0, 0.6);
+
+  --zp-auth-bg: linear-gradient(135deg, #0a0a0b 0%, #151517 52%, #0e0e10 100%);
+  --zp-auth-blob-a: rgba(34, 199, 212, 0.1);
+  --zp-auth-blob-b: rgba(255, 255, 255, 0.05);
+  --zp-auth-grid: rgba(255, 255, 255, 0.05);
+  --zp-auth-field: #1b1b1e;
+  --zp-auth-chip: #172224;
+  --zp-auth-chip-text: #5fd8e4;
+}
+
+html {
+  background: var(--zp-bg);
+}
+
+body {
+  background: var(--zp-bg);
+  color: var(--zp-navy);
+}
+
+/*
+ * One global cross-fade for the theme switch. Only colour-bearing properties
+ * are animated so layout transitions, hovers and chart animations elsewhere are
+ * untouched; `transition-colors` utilities simply win with their own duration.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html.zp-theme-transition,
+  html.zp-theme-transition *,
+  html.zp-theme-transition *::before,
+  html.zp-theme-transition *::after {
+    transition:
+      background-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-image 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      color 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      fill 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      stroke 320ms cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 320ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* Native controls and selection follow the theme too. */
+input,
+textarea,
+select {
+  color: inherit;
+}
+
+::placeholder {
+  color: var(--zp-slate-light);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--zp-teal) 28%, transparent);
+  color: var(--zp-navy);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--zp-border-strong);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--zp-slate-light);
+}
+
+* {
+  scrollbar-color: var(--zp-border-strong) transparent;
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZodiacPluss Admin</title>
+    <meta name="description" content="Manage user interactions and expert services seamlessly with a premium admin dashboard designed for mental wellness and astrology platforms, featuring advanced analytics and intuitive controls." />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
+    <script>
+      // Apply the saved theme before first paint so reloading in dark mode
+      // never flashes a white screen.
+      (function () {
+        try {
+          var saved = localStorage.getItem("zp_admin_theme");
+          var dark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+          if (dark) document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+          document.documentElement.style.background = dark ? "#0A0A0B" : "#F1F5F9";
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
