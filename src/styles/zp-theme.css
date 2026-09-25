@@ -34,14 +34,20 @@
   --zp-grid: #f1f5f9;
   --zp-shadow: rgba(12, 27, 51, 0.08);
 
-  /* Login-screen ambience, the one place with its own scenery. */
-  --zp-auth-bg: linear-gradient(135deg, #edf9f7 0%, #f5fbfb 52%, #eef7fb 100%);
-  --zp-auth-blob-a: rgba(199, 238, 234, 0.7);
-  --zp-auth-blob-b: rgba(216, 238, 248, 0.8);
-  --zp-auth-grid: rgba(13, 157, 168, 0.06);
-  --zp-auth-field: #fbfdfd;
-  --zp-auth-chip: #eaf8f6;
-  --zp-auth-chip-text: #147a82;
+  /* Login screen — its own enterprise palette, separate from the admin teal. */
+  --zp-auth-surface: #f8f8fc;
+  --zp-auth-glow: rgba(200, 203, 243, 0.55);
+  --zp-auth-ink: #121633;
+  --zp-auth-body: #5d6390;
+  --zp-auth-muted: #62677f;
+  --zp-auth-line: #e3e5ee;
+  --zp-auth-field: #ffffff;
+  --zp-auth-field-border: #d6d9e4;
+  --zp-auth-placeholder: #9a9db5;
+  --zp-auth-accent: #3a44c6;
+  --zp-auth-accent-hover: #2f38a8;
+  --zp-auth-accent-ring: rgba(58, 68, 198, 0.18);
+  --zp-auth-notice: #eceefb;
 }
 
 .dark {
@@ -71,17 +77,54 @@
   --zp-grid: rgba(255, 255, 255, 0.09);
   --zp-shadow: rgba(0, 0, 0, 0.6);
 
-  --zp-auth-bg: linear-gradient(135deg, #0a0a0b 0%, #151517 52%, #0e0e10 100%);
-  --zp-auth-blob-a: rgba(34, 199, 212, 0.1);
-  --zp-auth-blob-b: rgba(255, 255, 255, 0.05);
-  --zp-auth-grid: rgba(255, 255, 255, 0.05);
-  --zp-auth-field: #1b1b1e;
-  --zp-auth-chip: #172224;
-  --zp-auth-chip-text: #5fd8e4;
+  --zp-auth-surface: #0f1017;
+  --zp-auth-glow: rgba(88, 96, 200, 0.16);
+  --zp-auth-ink: #eceef8;
+  --zp-auth-body: #a4a8c6;
+  --zp-auth-muted: #8a8ea8;
+  --zp-auth-line: #262838;
+  --zp-auth-field: #161823;
+  --zp-auth-field-border: #2e3144;
+  --zp-auth-placeholder: #6e7290;
+  --zp-auth-accent: #5a64e6;
+  --zp-auth-accent-hover: #6f78ee;
+  --zp-auth-accent-ring: rgba(111, 120, 238, 0.28);
+  --zp-auth-notice: #1a1c2c;
 }
 
 html {
   background: var(--zp-bg);
+}
+
+/*
+ * Login: left-panel scenery.
+ *
+ * TEMPORARY APPROXIMATION — the reference photograph (grey wall, wood slats,
+ * city window, lounge chair) is not in the repository yet. These layers only
+ * sketch its tones and light. To use the real photo, add it under src/assets
+ * and replace the last two layers with `url(...) center / cover no-repeat`,
+ * keeping the first (legibility) layer.
+ */
+.zp-auth-photo {
+  background-color: #56544f;
+  background-image:
+    /* legibility: darken behind the copy */
+    linear-gradient(90deg, rgba(22, 22, 24, 0.5) 0%, rgba(22, 22, 24, 0.28) 55%, rgba(22, 22, 24, 0) 78%),
+    /* diagonal sunlight across the wall */
+    linear-gradient(118deg, transparent 40%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.03) 58%, transparent 66%),
+    /* floor */
+    linear-gradient(to top, #34322f 0%, #45433f 16%, rgba(69, 67, 63, 0) 30%),
+    /* window: soft reveal from the wall, a mullion, hazy sky over a pale skyline */
+    linear-gradient(90deg, rgba(86, 84, 79, 1) 0%, rgba(86, 84, 79, 0) 6%),
+    linear-gradient(90deg, transparent 23%, rgba(58, 57, 55, 0.85) 23%, rgba(58, 57, 55, 0.85) 26%, transparent 26%),
+    linear-gradient(to bottom, #c9d2db 0%, #b9c4ce 45%, #9aa4ad 80%, rgba(86, 84, 79, 0.9) 100%),
+    /* wood slats */
+    repeating-linear-gradient(90deg, #3f3127 0 5px, #5b4637 5px 13px),
+    /* wall */
+    linear-gradient(165deg, #6c6a66 0%, #5c5a56 45%, #4a4845 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 25% 80%, 25% 80%, 25% 80%, 12% 100%, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 100% 0, 100% 0, 100% 0, 0 0, 0 0;
+  background-repeat: no-repeat;
 }
 
 body {

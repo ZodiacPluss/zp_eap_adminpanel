@@ -1,40 +1,37 @@
 import { useEffect, useRef, useState } from "react";
+import { AlertCircle, ArrowRight, Info, LockKeyhole, Mail } from "lucide-react";
 import {
-  AlertCircle,
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  Mail,
-  Moon,
-  ShieldCheck,
-  Sun,
-} from "lucide-react";
-import zodiacLogo from "@/imports/Zodiac_Colored_Logo_croped-removebg-preview.png";
-import { useTheme } from "@/app/theme/ThemeProvider";
+  AuthNotConfiguredError,
+  startCompanySignIn,
+} from "@/app/services/auth";
 
-const AUTHORIZED_EMAIL = "admin@zodiacpluss.com";
-const ADMIN_PASSWORD = "password123";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const BENEFITS = [
+  ["Healthier", "Employees"],
+  ["Stronger", "Teams"],
+  ["More Resilient", "Organizations"],
+];
+
+// TODO: point these at the published policy pages once they exist.
+const FOOTER_LINKS = [
+  { label: "Privacy", href: "#privacy" },
+  { label: "Terms", href: "#terms" },
+  { label: "Contact", href: "#contact" },
+];
+
 export default function LoginPage({ onLogin }) {
-  const { dark, toggleTheme } = useTheme();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const loginTimerRef = useRef(null);
-
+  // Guards against state updates after the page unmounts mid-request.
+  const mountedRef = useRef(false);
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      if (loginTimerRef.current) {
-        window.clearTimeout(loginTimerRef.current);
-      }
+      mountedRef.current = false;
     };
   }, []);
 
@@ -44,13 +41,7 @@ export default function LoginPage({ onLogin }) {
     setNotice("");
   };
 
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-    setError("");
-    setNotice("");
-  };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (loading) return;
@@ -60,8 +51,8 @@ export default function LoginPage({ onLogin }) {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail || !password) {
-      setError("Enter your email address and password to continue.");
+    if (!normalizedEmail) {
+      setError("Enter your work email to continue.");
       return;
     }
 
@@ -72,276 +63,171 @@ export default function LoginPage({ onLogin }) {
 
     setLoading(true);
 
-    loginTimerRef.current = window.setTimeout(() => {
-      const isValidCredentials =
-        normalizedEmail === AUTHORIZED_EMAIL &&
-        password === ADMIN_PASSWORD;
+    try {
+      const result = await startCompanySignIn(normalizedEmail);
 
-      setLoading(false);
-
-      if (!isValidCredentials) {
-        setError("Invalid email address or password.");
+      if (result.type === "redirect") {
+        window.location.assign(result.url);
         return;
       }
 
-      const sessionData = {
-        email: normalizedEmail,
-        role: "Super Admin",
-      };
-
-      if (keepSignedIn) {
-        localStorage.setItem(
-          "zodiacpluss-admin-session",
-          JSON.stringify(sessionData)
-        );
-        sessionStorage.removeItem("zodiacpluss-admin-session");
-      } else {
-        sessionStorage.setItem(
-          "zodiacpluss-admin-session",
-          JSON.stringify(sessionData)
-        );
-        localStorage.removeItem("zodiacpluss-admin-session");
-      }
-
-      onLogin?.(sessionData);
-    }, 800);
+      onLogin?.(result.user);
+    } catch (err) {
+      if (!mountedRef.current) return;
+      setError(
+        err instanceof AuthNotConfiguredError
+          ? err.message
+          : "We couldn't start sign-in. Please try again."
+      );
+    } finally {
+      if (mountedRef.current) setLoading(false);
+    }
   };
 
-  const handleForgotPassword = () => {
+  const handleNeedHelp = () => {
     setError("");
-    setNotice(
-      "Please contact your administrator to reset your password."
-    );
+    setNotice("For sign-in help, please contact your organization's administrator.");
+  };
+
+  const handleOtherProvider = () => {
+    setError("");
+    setNotice("Signing in with a different identity provider isn't available yet.");
   };
 
   return (
-    <main
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[image:var(--zp-auth-bg)] px-5 py-8 font-['Inter',system-ui,sans-serif] text-[var(--zp-navy)] sm:px-8 lg:px-12"
-      aria-label="ZodiacPluss Admin sign in"
-    >
-      <button
-        type="button"
-        onClick={toggleTheme}
-        title={dark ? "Switch to light mode" : "Switch to dark mode"}
-        aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-        aria-pressed={dark}
-        className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-[var(--zp-border)] bg-[var(--zp-card)]/70 text-[var(--zp-slate)] backdrop-blur transition hover:text-[var(--zp-brand)] sm:right-8 sm:top-8"
+    <main className="flex min-h-screen w-full flex-col font-['Figtree',system-ui,sans-serif] lg:grid lg:grid-cols-2">
+      {/* ── Brand panel ─────────────────────────────────────────────────── */}
+      <section
+        aria-label="ZodiacPluss Employee Assistance Program"
+        className="zp-auth-photo flex flex-col px-6 pb-10 pt-8 text-white sm:px-10 sm:pb-12 lg:min-h-screen lg:px-[17.8%] lg:pb-16 lg:pt-[70px]"
       >
-        <Sun className={`absolute h-[18px] w-[18px] transition-all duration-300 ${dark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-50 opacity-0"}`} />
-        <Moon className={`absolute h-[18px] w-[18px] transition-all duration-300 ${dark ? "rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100"}`} />
-      </button>
+        <p className="text-[24px] font-medium leading-none tracking-[-0.02em] lg:text-[30px]">
+          ZodiacPluss
+        </p>
 
-      <div className="pointer-events-none absolute -left-36 -top-36 h-[420px] w-[420px] rounded-full bg-[var(--zp-auth-blob-a)] blur-3xl" />
+        <div className="mt-10 lg:mt-[max(40px,8.3vh)]">
+          <p className="text-[10.5px] uppercase tracking-[0.42em] text-white/85 lg:text-[11.5px]">
+            Employee Assistance <span className="font-semibold text-white">Program</span>
+          </p>
 
-      <div className="pointer-events-none absolute -bottom-44 -right-24 h-[440px] w-[440px] rounded-full bg-[var(--zp-auth-blob-b)] blur-3xl" />
+          <h2 className="mt-5 text-[30px] font-light leading-[1.13] lg:leading-[1.085] tracking-[-0.01em] sm:text-[38px] lg:mt-[26px] lg:text-[clamp(34px,3vw,54px)]">
+            <span className="text-white">
+              Supporting <br className="hidden sm:block" />
+              people at work.
+            </span>{" "}
+            <br className="hidden sm:block" />
+            <span className="text-white/75">
+              For a better <br className="hidden sm:block" />
+              tomorrow.
+            </span>
+          </h2>
 
-      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(var(--zp-auth-grid)_1px,transparent_1px),linear-gradient(90deg,var(--zp-auth-grid)_1px,transparent_1px)] [background-size:42px_42px] [mask-image:linear-gradient(to_bottom,black,transparent_75%)]" />
+          <p className="mt-4 hidden text-[15px] leading-[25px] lg:mt-3.5 text-white/85 sm:block lg:text-[17px]">
+            Comprehensive mental health and wellbeing <br className="hidden xl:block" />
+            support for modern organizations.
+          </p>
 
-      <div className="relative w-full max-w-[1120px] lg:grid lg:grid-cols-[minmax(0,1fr)_440px] lg:items-center lg:gap-20 xl:gap-28">
-        <section
-          className="flex flex-col items-center text-center lg:items-start lg:text-left"
-          aria-label="ZodiacPluss"
-        >
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-5 lg:justify-start">
-            <img
-              src={zodiacLogo}
-              alt="ZodiacPluss logo"
-              className="h-[72px] w-[72px] shrink-0 object-contain sm:h-20 sm:w-20"
-            />
+          <div className="mt-11 hidden h-[2px] w-[42px] bg-white/85 md:block" aria-hidden="true" />
 
-            <div className="text-center sm:text-left">
-              <div className="text-[30px] font-extrabold leading-none tracking-[-1.6px] sm:text-[48px] lg:text-[58px]">
-                <span>ZodiacPluss</span>
-              </div>
+          <ul className="mt-12 hidden lg:mt-[46px] text-[15px] lg:text-[16px] leading-[21.5px] text-white/85 md:flex">
+            {BENEFITS.map(([first, second]) => (
+              <li
+                key={second}
+                className="whitespace-nowrap border-white/40 px-[clamp(20px,2.3vw,37px)] first:pl-0 last:pr-0 [&:not(:last-child)]:border-r"
+              >
+                {first}
+                <br />
+                {second}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
 
-              <p className="mt-2 text-[14px] font-semibold  tracking-[0.18em] text-[var(--zp-slate)]">
-                Your personal wellness companion
-              </p>
-            </div>
-          </div>
+      {/* ── Sign-in panel ───────────────────────────────────────────────── */}
+      <section
+        aria-label="Sign in"
+        className="relative flex flex-1 flex-col overflow-hidden bg-[var(--zp-auth-surface)] px-6 pb-8 pt-6 text-[var(--zp-auth-ink)] sm:px-10 lg:min-h-screen lg:pb-[58px] lg:pl-[12.7%] lg:pr-[6.3%] lg:pt-[74px]"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_45%_at_28%_105%,var(--zp-auth-glow),transparent_70%)]"
+        />
 
-          <div className="mt-12 hidden max-w-[575px] sm:block">
+        <div className="relative flex justify-end">
+          <button
+            type="button"
+            onClick={handleNeedHelp}
+            className="rounded text-[14px] leading-5 text-[var(--zp-auth-body)] transition hover:text-[var(--zp-auth-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--zp-auth-accent)]"
+          >
+            Need help?
+          </button>
+        </div>
 
-
-            <h1 className="mt-5 text-5xl font-bold leading-[1.08] tracking-[-2.5px] lg:text-[56px]">
-              Make every{" "}
-              <span className="text-[var(--zp-brand)]">interaction</span> count.
-            </h1>
-
-            <p className="mt-6 md:ml-6 lg:ml-1 max-w-[490px] text-[15px] leading-7 text-[var(--zp-slate)]">
-              A focused workspace for supporting members, managing experts,
-              and helping more people move towards a healthier, happier life.
+        <div className="relative mx-auto mt-8 w-full max-w-[482px] lg:mt-[max(40px,8.4vh)]">
+          <header>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-[var(--zp-auth-muted)]">
+              Company access
             </p>
 
-            <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-[var(--zp-brand)]/25 bg-[var(--zp-card)]/80 px-4 py-2.5 text-xs font-semibold text-[var(--zp-brand-deep)] shadow-[0_8px_24px_-16px_var(--zp-shadow)]">
-              <ShieldCheck className="h-4 w-4 text-[var(--zp-brand)]" aria-hidden="true" />
-              A calm, secure place to do meaningful work
-            </div>
-          </div>
-        </section>
+            <h1 className="mt-5 text-[32px] font-medium leading-[1.15] tracking-[-0.01em] sm:text-[42px]">
+              Sign in to your <br className="hidden sm:block" />
+              company account
+            </h1>
 
-        <section
-          className="mx-auto mt-10 w-full rounded-[24px] border border-[var(--zp-border)] bg-[var(--zp-card)] p-6 text-center shadow-[0_28px_70px_-28px_var(--zp-shadow)] sm:p-8 lg:mt-0"
-          aria-label="Sign in"
-        >
-          <header>
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--zp-brand)]">
-                Welcome back
-              </p>
-
-              <span className="rounded-full bg-[var(--zp-auth-chip)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--zp-auth-chip-text)]">
-                Staff only
-              </span>
-            </div>
-
-            <h2 className="mt-3 text-[27px] font-bold leading-tight tracking-[-1px] text-[var(--zp-navy)] sm:text-[30px]">
-              Sign in to your workspace
-            </h2>
-
-            <p className="mt-2 text-sm leading-6 text-[var(--zp-slate)]">
-              Use your authorized ZodiacPluss account to continue.
+            <p className="mt-4 text-[16px] leading-[1.6] text-[var(--zp-auth-body)] sm:text-[20.5px] sm:leading-[1.45]">
+              Use your work email to continue with your{" "}
+              <br className="hidden sm:block" />
+              organization&apos;s single sign-on (SSO).
             </p>
           </header>
 
           {error && (
             <div
-              className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--zp-rose)]/30 bg-[var(--zp-rose)]/12 px-3 py-2.5 text-left text-sm text-[var(--zp-rose)]"
               role="alert"
+              className="mt-6 flex items-start gap-2.5 rounded-md border border-[var(--zp-rose)]/30 bg-[var(--zp-rose)]/10 px-3.5 py-2.5 text-[14px] leading-5 text-[var(--zp-rose)]"
             >
-              <AlertCircle
-                className="mt-0.5 h-4 w-4 shrink-0"
-                aria-hidden="true"
-              />
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
 
           {notice && (
             <div
-              className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--zp-brand)]/25 bg-[var(--zp-auth-chip)] px-3 py-2.5 text-left text-sm text-[var(--zp-auth-chip-text)]"
               role="status"
+              className="mt-6 flex items-start gap-2.5 rounded-md bg-[var(--zp-auth-notice)] px-3.5 py-2.5 text-[14px] leading-5 text-[var(--zp-auth-body)]"
             >
-              <ShieldCheck
-                className="mt-0.5 h-4 w-4 shrink-0"
-                aria-hidden="true"
-              />
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--zp-auth-accent)]" aria-hidden="true" />
               <span>{notice}</span>
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="mt-7 flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-2 text-left">
-              <FieldLabel htmlFor="email">Email address</FieldLabel>
+          <form onSubmit={handleSubmit} noValidate className="mt-8 lg:mt-[35px]">
+            <label htmlFor="email" className="block text-[16px] font-medium leading-5">
+              Work email
+            </label>
 
-              <div className="flex items-center gap-3 rounded-xl border border-[var(--zp-border-strong)] bg-[var(--zp-auth-field)] px-3.5 py-3.5 transition focus-within:border-[var(--zp-brand)] focus-within:bg-[var(--zp-card)] focus-within:ring-4 focus-within:ring-[var(--zp-brand)]/15">
-                <Mail
-                  className="h-5 w-5 shrink-0 text-[var(--zp-slate-light)]"
-                  aria-hidden="true"
-                />
-
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  placeholder="you@zodiacpluss.com"
-                  value={email}
-                  onChange={handleEmailChange}
-                  disabled={loading}
-                  className="w-full bg-transparent text-left text-sm text-[var(--zp-navy)] outline-none placeholder:text-[var(--zp-slate-light)] disabled:cursor-not-allowed disabled:opacity-60"
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2 text-left">
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-
-              <div className="flex items-center gap-3 rounded-xl border border-[var(--zp-border-strong)] bg-[var(--zp-auth-field)] px-3.5 py-3.5 transition focus-within:border-[var(--zp-brand)] focus-within:bg-[var(--zp-card)] focus-within:ring-4 focus-within:ring-[var(--zp-brand)]/15">
-                <LockKeyhole
-                  className="h-5 w-5 shrink-0 text-[var(--zp-slate-light)]"
-                  aria-hidden="true"
-                />
-
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={handlePasswordChange}
-                  disabled={loading}
-                  className="w-full bg-transparent text-left text-sm text-[var(--zp-navy)] outline-none placeholder:text-[var(--zp-slate-light)] disabled:cursor-not-allowed disabled:opacity-60"
-                />
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowPassword((visible) => !visible)
-                  }
-                  disabled={loading}
-                  aria-label={
-                    showPassword ? "Hide password" : "Show password"
-                  }
-                  className="shrink-0 text-[var(--zp-slate-light)] transition hover:text-[var(--zp-brand)] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setKeepSignedIn((signedIn) => !signedIn)
-                }
+            <div className="mt-[9px] flex h-[50px] items-center gap-[19px] rounded-md border border-[var(--zp-auth-field-border)] bg-[var(--zp-auth-field)] px-[18px] transition focus-within:border-[var(--zp-auth-accent)] focus-within:ring-4 focus-within:ring-[var(--zp-auth-accent-ring)]">
+              <Mail className="h-5 w-5 shrink-0 text-[var(--zp-auth-body)]" strokeWidth={1.6} aria-hidden="true" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={handleEmailChange}
                 disabled={loading}
-                aria-pressed={keepSignedIn}
-                className="flex items-center gap-2 text-sm font-medium text-[var(--zp-slate)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-md border transition ${
-                    keepSignedIn
-                      ? "border-[var(--zp-brand)] bg-[var(--zp-brand)]"
-                      : "border-[var(--zp-border-strong)] bg-[var(--zp-card)]"
-                  }`}
-                >
-                  {keepSignedIn && (
-                    <Check
-                      className="h-3.5 w-3.5 text-[var(--zp-on-accent)]"
-                      aria-hidden="true"
-                    />
-                  )}
-                </span>
-
-                Keep me signed in
-              </button>
-
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                disabled={loading}
-                className="text-sm font-semibold text-[var(--zp-brand)] transition hover:text-[var(--zp-brand-deep)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Forgot password?
-              </button>
+                aria-invalid={Boolean(error)}
+                className="h-full w-full min-w-0 bg-transparent text-[16px] text-[var(--zp-auth-ink)] outline-none placeholder:text-[var(--zp-auth-placeholder)] disabled:cursor-not-allowed disabled:opacity-60"
+              />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex min-h-[52px] items-center justify-center gap-3 rounded-xl bg-[var(--zp-brand)] px-5 text-sm font-bold text-[var(--zp-on-accent)] shadow-[0_14px_26px_-12px_rgba(13,157,168,0.75)] transition hover:-translate-y-0.5 hover:bg-[var(--zp-teal-dark)] hover:shadow-[0_18px_30px_-12px_rgba(13,157,168,0.8)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-[23px] flex h-[53px] w-full items-center justify-center gap-4 rounded-md bg-[var(--zp-auth-accent)] text-[19px] font-medium text-white transition hover:bg-[var(--zp-auth-accent-hover)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--zp-auth-accent-ring)] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? (
                 <>
@@ -349,40 +235,60 @@ export default function LoginPage({ onLogin }) {
                     className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
                     aria-hidden="true"
                   />
-                  Signing in...
+                  Continuing…
                 </>
               ) : (
                 <>
-                  Sign in
-                  <ArrowRight
-                    className="h-4 w-4"
-                    aria-hidden="true"
-                  />
+                  Continue
+                  <ArrowRight className="h-[22px] w-[22px]" strokeWidth={1.8} aria-hidden="true" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[var(--zp-auth-chip)] px-3 py-2.5 text-center text-xs font-medium text-[var(--zp-slate)]">
-            <ShieldCheck
-              className="h-4 w-4 shrink-0 text-[var(--zp-brand)]"
-              aria-hidden="true"
-            />
-            Secure access for authorized ZodiacPluss staff
+          <div className="mt-[30px] flex items-center gap-[18px]" aria-hidden="true">
+            <span className="h-px flex-1 bg-[var(--zp-auth-line)]" />
+            <span className="text-[11px] font-semibold tracking-[0.1em] text-[var(--zp-auth-muted)]">OR</span>
+            <span className="h-px flex-1 bg-[var(--zp-auth-line)]" />
           </div>
-        </section>
-      </div>
-    </main>
-  );
-}
 
-function FieldLabel({ htmlFor, children }) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-sm font-semibold text-[var(--zp-navy)]"
-    >
-      {children}
-    </label>
+          <div className="mt-[38px] text-center">
+            <button
+              type="button"
+              onClick={handleOtherProvider}
+              disabled={loading}
+              className="rounded text-[15px] text-[var(--zp-auth-body)] transition hover:text-[var(--zp-auth-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--zp-auth-accent)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Sign in with a different identity provider
+            </button>
+          </div>
+        </div>
+
+        <footer className="relative mt-16 flex flex-col items-center gap-4 text-[13.5px] text-[var(--zp-auth-muted)] sm:flex-row sm:justify-between lg:mt-auto lg:flex-col xl:flex-row lg:pt-12">
+          <p className="flex items-center gap-2.5 whitespace-nowrap">
+            <LockKeyhole className="h-4 w-4 shrink-0" strokeWidth={1.6} aria-hidden="true" />
+            Protected by enterprise-grade encryption
+          </p>
+
+          <nav aria-label="Legal">
+            <ul className="flex items-center">
+              {FOOTER_LINKS.map(({ label, href }) => (
+                <li
+                  key={label}
+                  className="border-[var(--zp-auth-line)] border-l px-6 leading-4 first:border-l-0 first:pl-0 last:pr-0"
+                >
+                  <a
+                    href={href}
+                    className="transition hover:text-[var(--zp-auth-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--zp-auth-accent)]"
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </footer>
+      </section>
+    </main>
   );
 }
