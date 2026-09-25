@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { cloudflare } from '@cloudflare/vite-plugin'
+// import { cloudflare } from '@cloudflare/vite-plugin'  // ← un-comment when deploying to Cloudflare
 
 function figmaAssetResolver() {
   return {
@@ -21,12 +21,12 @@ export default defineConfig({
     figmaAssetResolver(),
     react(),
     tailwindcss(),
-    cloudflare(),
+    // cloudflare(),  // ← un-comment when deploying to Cloudflare
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.lottie'],
 })

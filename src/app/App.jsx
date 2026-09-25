@@ -18,6 +18,9 @@ import LoginPage from "@/app/pages/auth/LoginPage";
 // ─── Main private pages ───────────────────────────────────────────────────────
 import DashboardOverviewPage from "@/app/pages/dashboard/DashboardOverviewPage";
 import ClientsManagementPage from "@/app/pages/dashboard/ClientsManagementPage";
+import EmployeesManagementPage from "@/app/pages/dashboard/EmployeesManagementPage";
+import ProgramsPage from "@/app/pages/dashboard/ProgramsPage";
+import ContactSupportDialog from "@/app/components/support/ContactSupportDialog";
 import ExpertsManagementPage from "@/app/pages/dashboard/ExpertsManagementPage";
 import EAPCalendarPage from "@/app/pages/dashboard/EAPCalendarPage";
 import TransactionsFinancePage from "@/app/pages/dashboard/TransactionsFinancePage";
@@ -29,10 +32,10 @@ import SettingsConfigPage from "@/app/pages/dashboard/SettingsConfigPage";
 import AdminProfilePage from "@/app/pages/dashboard/AdminProfilePage";
 
 const DEFAULT_PROFILE = {
-  name: "Rashmi",
-  email: "rashmi.guia@zodiacpluss.com",
+  name: "Amit Sharma",
+  email: "amit.sharma@abctechnologies.com",
   phone: "+91 98765 43210",
-  role: "Super Admin",
+  role: "HR Administrator",
   timezone: "Asia/Kolkata (IST)",
   language: "English (India)",
   about: "Guiding people towards a more mindful and balanced tomorrow.",
@@ -55,8 +58,22 @@ const ComingSoon = ({ title }) => {
   );
 };
 
+// Pages that are not in the sidebar yet (clients … table) stay wired here so
+// they can be linked again as their redesigns land.
+// Header search hint per page, where the design names one.
+const SEARCH_PLACEHOLDERS = {
+  employees: "Search by name, email or employee ID...",
+  programs: "Search by name, email or employee ID...",
+};
+
+// Pages rebuilt from the new designs; the legacy floating quick-action button is not part of them.
+const REDESIGNED_PAGES = new Set(["dashboard", "employees", "programs"]);
+
 const PAGES = {
-  dashboard: <DashboardOverviewPage />,
+  assessments: <ComingSoon title="Assessments" />,
+  departments: <ComingSoon title="Departments" />,
+  organization: <ComingSoon title="Organization" />,
+  resources: <ComingSoon title="Resources" />,
   clients: <ClientsManagementPage />,
   experts: <ExpertsManagementPage />,
   eap: <EAPCalendarPage />,
@@ -78,6 +95,9 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(true);
   const [showSplash, setShowSplash] = useState(true);
   const [profile, setProfile] = useState(DEFAULT_PROFILE);
+  const [supportOpen, setSupportOpen] = useState(false);
+  // Header search runs against the employee directory; `id` lets the same query be sent twice.
+  const [employeeSearch, setEmployeeSearch] = useState(null);
 
   // Authentication State
   const [user, setUser] = useState(null);
@@ -137,6 +157,22 @@ export default function App() {
 
   const ml = isMobile ? 0 : (collapsed ? 0 : SIDEBAR_W);
 
+  const handleGlobalSearch = (query) => {
+    setEmployeeSearch({ query, id: Date.now() });
+    setActive("employees");
+  };
+
+  const renderPage = () => {
+    switch (active) {
+      case "dashboard": return <DashboardOverviewPage profile={profile} onNavigate={setActive} />;
+      case "employees": return <EmployeesManagementPage onNavigate={setActive} searchRequest={employeeSearch} />;
+      case "programs": return <ProgramsPage onNavigate={setActive} onContactSupport={() => setSupportOpen(true)} />;
+      case "profile": return <AdminProfilePage profile={profile} onEdit={() => setActive("settings")} />;
+      case "settings": return <SettingsConfigPage profile={profile} onSave={handleProfileSave} />;
+      default: return PAGES[active] ?? <DashboardOverviewPage profile={profile} onNavigate={setActive} />;
+    }
+  };
+
   if (showSplash) {
     return <SplashScreen onComplete={handleSplashComplete} minDuration={3500} />;
   }
@@ -165,16 +201,18 @@ export default function App() {
         }
       `}</style>
       <div className="min-h-screen" style={{ background: P.bg, fontFamily: "'Inter',system-ui,sans-serif" }}>
-        <SidebarNav active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} onLogout={handleLogout} user={user} />
-        <TopNavHeader ml={ml} page={active} onToggleSidebar={() => setCollapsed(v => !v)} onNavigate={setActive} onLogout={handleLogout} profile={profile} />
+        <SidebarNav active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} profile={profile} onContactSupport={() => setSupportOpen(true)} />
+        <TopNavHeader ml={ml} searchPlaceholder={SEARCH_PLACEHOLDERS[active]} onSearch={handleGlobalSearch} onToggleSidebar={() => setCollapsed(v => !v)} onNavigate={setActive} onLogout={handleLogout} profile={profile} />
         <main className="pt-16 transition-all duration-300 ease-in-out" style={{ marginLeft: ml }}>
-          <div className={`${isMobile ? "p-4" : "p-7"} max-w-[1600px] mx-auto`}>
+          {/* Home sits flush under the header, as in its design. */}
+          <div className={`${isMobile ? "p-4" : "p-7"} ${active === "dashboard" && !isMobile ? "pt-1 pb-4" : ""} max-w-[1600px] mx-auto`}>
             <div key={active} className="animate-pageEnter">
-              {active === "profile" ? <AdminProfilePage profile={profile} onEdit={() => setActive("settings")} /> : active === "settings" ? <SettingsConfigPage profile={profile} onSave={handleProfileSave} /> : (PAGES[active] ?? PAGES.dashboard)}
+              {renderPage()}
             </div>
           </div>
         </main>
-        <QuickActionButton />
+        {!REDESIGNED_PAGES.has(active) && <QuickActionButton />}
+        <ContactSupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
       </div>
     </>
   );

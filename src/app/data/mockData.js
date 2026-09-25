@@ -1,5 +1,8 @@
 import {
-  AlertTriangle, DollarSign, UserPlus, Rocket, Activity, CheckCircle
+  AlertTriangle, DollarSign, UserPlus, Rocket, Activity, CheckCircle,
+  House, Users, BriefcaseMedical, SquareCheck, ChartColumn, Building2, Library, Settings,
+  UserCheck, CalendarCheck, Clock3, HeartHandshake, UsersRound, History, FileText,
+  SquareUserRound, ChartColumnIncreasing, NotebookText, MessageSquareMore, MessageSquareText, Power,
 } from "lucide-react";
 // Accent colours are referenced by palette key (`tone`) and resolved at render
 // time from the active theme — see `usePalette()`.
@@ -39,12 +42,6 @@ export const expertCats = [
   { cat: "Astrology", experts: 312, sessions: 14200 }, { cat: "Therapy", experts: 248, sessions: 18900 },
   { cat: "Wellness", experts: 189, sessions: 11400 }, { cat: "Meditation", experts: 176, sessions: 9800 },
   { cat: "Nutrition", experts: 142, sessions: 7600 }, { cat: "Yoga", experts: 98, sessions: 6200 },
-];
-
-export const userDist = [
-  { name: "Clients", value: 24891, tone: "teal" },
-  { name: "Experts", value: 1247, tone: "emerald" },
-  { name: "EAP", value: 4520, tone: "amber" },
 ];
 
 export const clients = [
@@ -164,39 +161,198 @@ export const CALENDAR_EVENTS = [
   },
 ];
 
-export const NAV_MAIN = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "clients", label: "Client Users" },
-  { id: "experts", label: "Expert Users" },
-  { id: "support", label: "Inbox", badge: 23 },
-  { id: "finance", label: "Transactions" },
+// ─── Navigation ───────────────────────────────────────────────────────────────
+export const NAV_ITEMS = [
+  { id: "dashboard", label: "Home", icon: House },
+  { id: "employees", label: "Employees", icon: Users },
+  { id: "departments", label: "Departments", icon: Building2 },
+  { id: "programs", label: "Programs", icon: BriefcaseMedical },
+  { id: "assessments", label: "Assessments", icon: SquareCheck },
+  { id: "reports", label: "Reports", icon: ChartColumn },
+  { id: "resources", label: "Resources", icon: Library },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
-export const NAV_PAGES = [
-  { id: "pricing", label: "Pricing" },
-  { id: "eap", label: "EAP / Calendar" },
-  { id: "analytics", label: "Analytics" },
-  { id: "operations", label: "Operations" },
-  { id: "adminteam", label: "Admin Team" },
-  { id: "reports", label: "Reports" },
-  { id: "ui", label: "UI Elements" },
-  { id: "table", label: "Data Table" },
-];
+// Organizations the signed-in HR admin can switch between.
+export const ORGANIZATIONS = [{ id: "abc-technologies", name: "ABC Technologies" }];
 
-export const PAGE_CRUMBS = {
-  dashboard: ["Dashboard"],
-  clients: ["Client Users"],
-  experts: ["Expert Users"],
-  support: ["Inbox / Support"],
-  finance: ["Finance", "Transactions"],
-  pricing: ["Pages", "Pricing"],
-  eap: ["Pages", "EAP / Calendar"],
-  analytics: ["Pages", "Analytics"],
-  operations: ["Pages", "Operations"],
-  adminteam: ["Pages", "Admin Team"],
-  reports: ["Pages", "Reports"],
-  ui: ["Pages", "UI Elements"],
-  table: ["Pages", "Data Table"],
-  settings: ["Settings"],
-  profile: ["My Profile"],
+// ─── Company dashboard (Home) ─────────────────────────────────────────────────
+export const PROGRAM_HEALTH = {
+  score: 68,
+  change: 12,
+  ranges: ["This Month", "Last Month", "This Quarter"],
+  metrics: [
+    { label: "Total Employees", value: 1250, change: 5, icon: Users },
+    { label: "Active Employees", value: 1142, change: 8, icon: UserCheck },
+    { label: "Sessions Utilized", value: 328, change: 11, icon: CalendarCheck },
+    { label: "Assessments Completed", value: 804, change: 14, icon: Clock3 },
+  ],
 };
+
+// `reached` milestones get the solid marker; the rest are still in progress.
+export const MILESTONES = [
+  { title: "Employee Reach", detail: "1,250 employees onboarded", note: "You're all set! Keep inviting to increase reach.", status: "complete", reached: true },
+  { title: "Engagement", detail: "68% active this month", note: "Steady growth in program participation.", status: "on track" },
+  { title: "Wellbeing", detail: "804 assessments completed", note: "Employees are taking charge of their mental wellbeing.", status: "growing" },
+  { title: "Impact", detail: "Stronger, more resilient teams", note: "A healthier workplace, a brighter tomorrow.", status: "building", reached: true },
+];
+
+export const PARTNERSHIP_BENEFITS = [
+  { title: "Healthier Employees", detail: "More engaged and productive teams", icon: HeartHandshake },
+  { title: "Stronger Culture", detail: "A supportive and inclusive workplace", icon: UsersRound },
+  { title: "Lasting Impact", detail: "People who thrive, stay and grow", icon: History },
+];
+
+export const UPCOMING_ACTIONS = [
+  { id: "invitations", title: "12 pending invitations", detail: "Send reminders to new employees", icon: UserPlus, tone: "amber", target: "employees" },
+  { id: "engagement-report", title: "Monthly engagement report", detail: "Ready to download", icon: FileText, tone: "slate", target: "reports" },
+  { id: "plan-renewal", title: "Plan renewal", detail: "Renews in 32 days", icon: CalendarCheck, tone: "emerald", target: "organization" },
+];
+
+// ─── Employees ────────────────────────────────────────────────────────────────
+// Shaped like the future API rows: `status` is the EAP access state,
+// `engagement` is null until the employee has used the program, and
+// `lastActiveDays` is null when there has been no activity yet.
+export const DEPARTMENTS = ["Product", "Engineering", "Design", "Sales", "Human Resources", "Marketing", "Finance", "Operations"];
+
+export const ROLES_BY_DEPARTMENT = {
+  Product: ["Product Manager", "Product Analyst", "Product Owner"],
+  Engineering: ["Software Engineer", "QA Engineer", "Engineering Manager", "DevOps Engineer"],
+  Design: ["UX Designer", "Visual Designer", "UX Researcher"],
+  Sales: ["Account Executive", "Sales Manager", "Business Development Rep"],
+  "Human Resources": ["HR Specialist", "Talent Partner", "HR Manager"],
+  Marketing: ["Marketing Manager", "Content Strategist", "Growth Marketer"],
+  Finance: ["Finance Analyst", "Accountant", "Finance Manager"],
+  Operations: ["Operations Lead", "Operations Analyst", "Office Manager"],
+};
+
+export const EMPLOYMENT_TYPES = ["Full-time", "Part-time", "Contract", "Intern"];
+export const COUNTRY_CODES = [
+  { code: "+91", country: "IN" }, { code: "+1", country: "US" }, { code: "+44", country: "GB" },
+  { code: "+971", country: "AE" }, { code: "+65", country: "SG" },
+];
+
+export const EMPLOYEE_STATS = {
+  trends: { total: 12, active: 8, invited: 4, deactivated: -6 },
+  adoption: { engaged: 845 },
+};
+
+const REFERENCE_EMPLOYEES = [
+  { name: "Riya Sharma", email: "riya.sharma@abc.com", department: "Product", role: "Product Manager", status: "active", engagement: "high", lastActiveDays: 2 },
+  { name: "Arjun Khosla", email: "arjun.k@abc.com", department: "Engineering", role: "Software Engineer", status: "active", engagement: "medium", lastActiveDays: 7 },
+  { name: "Priya Patel", email: "priya.p@abc.com", department: "Design", role: "UX Designer", status: "active", engagement: "high", lastActiveDays: 3 },
+  { name: "Vikram Kapoor", email: "vikram.k@abc.com", department: "Sales", role: "Account Executive", status: "invited", engagement: null, lastActiveDays: null },
+  { name: "Sneha Nair", email: "sneha.n@abc.com", department: "Human Resources", role: "HR Specialist", status: "active", engagement: "medium", lastActiveDays: 5 },
+  { name: "Dev Tandon", email: "dev.t@abc.com", department: "Marketing", role: "Marketing Manager", status: "active", engagement: "low", lastActiveDays: 14 },
+  { name: "Karan Mehta", email: "karan.m@abc.com", department: "Finance", role: "Finance Analyst", status: "deactivated", engagement: null, lastActiveDays: null },
+  { name: "Ishita Arora", email: "ishita.a@abc.com", department: "Operations", role: "Operations Lead", status: "active", engagement: "high", lastActiveDays: 1 },
+];
+
+/** Deterministic filler so the table, counts and pagination stay stable between reloads. */
+function generateEmployees() {
+  let seed = 20260925;
+  const rand = () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const pick = (list) => list[Math.floor(rand() * list.length)];
+  const first = ["Aarav", "Ananya", "Rohan", "Meera", "Kabir", "Diya", "Aditya", "Nisha", "Rahul", "Pooja", "Siddharth", "Kavya", "Varun", "Tanvi", "Nikhil", "Isha", "Manish", "Shreya", "Harsh", "Neha", "Yash", "Aisha", "Kunal", "Ritu", "Omkar", "Sana", "Vivek", "Anjali", "Gaurav", "Tara"];
+  const last = ["Iyer", "Reddy", "Gupta", "Menon", "Singh", "Joshi", "Bose", "Malhotra", "Chopra", "Das", "Rao", "Kulkarni", "Pillai", "Verma", "Bhatt", "Saxena", "Nair", "Agarwal", "Shetty", "Kapoor"];
+
+  // Exact totals for the generated rows, so the whole list adds up to the stats.
+  const statuses = [...Array(1096).fill("active"), ...Array(95).fill("invited"), ...Array(49).fill("deactivated")];
+  for (let i = statuses.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [statuses[i], statuses[j]] = [statuses[j], statuses[i]];
+  }
+
+  const used = new Set(REFERENCE_EMPLOYEES.map((e) => e.email));
+  return statuses.map((status) => {
+    const firstName = pick(first);
+    const lastName = pick(last);
+    const department = pick(DEPARTMENTS);
+    let email = `${firstName}.${lastName[0]}@abc.com`.toLowerCase();
+    for (let n = 2; used.has(email); n++) email = `${firstName}.${lastName[0]}${n}@abc.com`.toLowerCase();
+    used.add(email);
+    const roll = rand();
+    return {
+      name: `${firstName} ${lastName}`,
+      email,
+      department,
+      role: pick(ROLES_BY_DEPARTMENT[department]),
+      status,
+      engagement: status === "active" ? (roll < 0.45 ? "high" : roll < 0.8 ? "medium" : "low") : null,
+      lastActiveDays: status === "active" ? Math.floor(rand() * 45) : null,
+    };
+  });
+}
+
+export const EMPLOYEES = [...REFERENCE_EMPLOYEES, ...generateEmployees()].map((employee, index) => ({
+  id: `emp-${index + 1}`,
+  employeeId: `EMP-${String(1001 + index)}`,
+  ...employee,
+}));
+
+// ─── Programs (EAP plans) ─────────────────────────────────────────────────────
+export const PROGRAM_FEATURES = [
+  { id: "counselling", title: "Confidential Counselling", description: "One-to-one sessions with licensed therapists", icon: SquareUserRound, tone: "brand" },
+  { id: "assessments", title: "Mental Wellbeing Assessments", description: "Track stress, anxiety and overall wellbeing", icon: ChartColumnIncreasing, tone: "emerald" },
+  { id: "self-help", title: "Self-Help Resources", description: "Articles, videos and guided programs", icon: NotebookText, tone: "violet" },
+  { id: "work-life", title: "Work-Life Support", description: "Guidance for personal and professional balance", icon: MessageSquareMore, tone: "amber" },
+  { id: "financial-legal", title: "Financial & Legal Guidance", description: "Expert advice for life's important decisions", icon: MessageSquareText, tone: "rose" },
+  { id: "always-on", title: "24/7 Support", description: "Access help anytime, anywhere", icon: Power, tone: "rose" },
+];
+
+export const PLAN_TYPES = ["Company-wide", "Department-specific", "Pilot group"];
+
+const DEFAULT_PLAN_SETTINGS = { autoRenew: true, selfEnrollment: false, familyAccess: true, featureAnnouncements: true };
+
+// `assignedEmployeeIds` reference EMPLOYEES, so enrolment figures are computed, not typed in.
+export const PROGRAMS = [
+  {
+    id: "comprehensive-eap",
+    name: "Comprehensive EAP",
+    status: "active",
+    summary: "A complete wellbeing solution with counselling, assessments, and self-help resources.",
+    description: "Provides confidential counselling, mental health support, work-life resources and expert guidance for employees and their families.",
+    planType: "Company-wide",
+    startDate: "2024-01-01",
+    renewalDate: "2025-01-01",
+    enrollmentTrend: 12,
+    features: PROGRAM_FEATURES.map((f) => f.id),
+    settings: DEFAULT_PLAN_SETTINGS,
+    assignedEmployeeIds: EMPLOYEES.filter((e) => e.status === "active").slice(0, 845).map((e) => e.id),
+  },
+  {
+    id: "essential-eap",
+    name: "Essential EAP",
+    status: "draft",
+    summary: "Core counselling and self-help resources for growing teams.",
+    description: "Confidential counselling, self-help content and round-the-clock support, without assessments or specialist guidance.",
+    planType: "Department-specific",
+    startDate: "2025-01-01",
+    renewalDate: "2026-01-01",
+    enrollmentTrend: 0,
+    features: ["counselling", "self-help", "always-on"],
+    settings: { ...DEFAULT_PLAN_SETTINGS, familyAccess: false },
+    assignedEmployeeIds: [],
+  },
+  {
+    id: "counselling-only",
+    name: "Counselling Only",
+    status: "inactive",
+    summary: "Confidential one-to-one counselling sessions with licensed therapists.",
+    description: "A focused plan offering confidential counselling sessions only. Previously used for the 2023 pilot group.",
+    planType: "Pilot group",
+    startDate: "2023-01-01",
+    renewalDate: "2024-01-01",
+    enrollmentTrend: 0,
+    features: ["counselling"],
+    settings: { ...DEFAULT_PLAN_SETTINGS, autoRenew: false },
+    assignedEmployeeIds: [],
+  },
+];
+
+export const EAP_PLANS = PROGRAMS.map((program) => program.name);

@@ -1,156 +1,277 @@
-import React from "react";
-import { Download, Users, UserCheck, Activity, DollarSign, Briefcase, Star, MessageSquare, TrendingUp, ArrowRight, MoreHorizontal } from "lucide-react";
-import {
-  AreaChart, Area, BarChart, Bar, PieChart as RPie, Pie, Cell, ResponsiveContainer,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend
-} from "recharts";
-import { fmtK, fmtINR } from "@/app/data/designTokens";
-import { usePalette, useAccents, useTipStyle } from "@/app/theme/ThemeProvider";
-import { monthlyGrowth, weekSessions, expertCats, userDist, clients, experts } from "@/app/data/mockData";
-import { PageShell } from "@/app/components/ui/PageShell";
+import React, { useState } from "react";
+import { ArrowRight, ArrowUp, CalendarDays, ChevronDown, ChevronRight, CirclePlay, Moon, Sun } from "lucide-react";
+import { MILESTONES, PARTNERSHIP_BENEFITS, PROGRAM_HEALTH, UPCOMING_ACTIONS } from "@/app/data/mockData";
 import { Card } from "@/app/components/ui/Card";
-import { KpiCard } from "@/app/components/ui/KpiCard";
 import { SectionHeader } from "@/app/components/ui/SectionHeader";
-import { TableHeader } from "@/app/components/ui/TableHeader";
-import { InitialsAvatar } from "@/app/components/ui/InitialsAvatar";
 import { StatusBadge } from "@/app/components/ui/StatusBadge";
+import { ProgressRing } from "@/app/components/ui/ProgressRing";
 
-export default function DashboardOverviewPage() {
-  const P = usePalette();
-  const A = useAccents();
-  const tipStyle = useTipStyle();
+const formatCount = (n) => n.toLocaleString("en-US");
+
+const primaryButton =
+  "inline-flex items-center justify-center gap-3 rounded-lg bg-[var(--zp-navy)] font-medium text-[var(--zp-card)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--zp-brand)]/25";
+
+// Static class names per accent so Tailwind can see them.
+const TONE_CLASSES = {
+  amber: "bg-[var(--zp-amber)]/12 text-[var(--zp-amber)]",
+  slate: "bg-[var(--zp-slate)]/10 text-[var(--zp-slate)]",
+  emerald: "bg-[var(--zp-emerald)]/12 text-[var(--zp-emerald)]",
+};
+
+function greetingFor(date) {
+  const hour = date.getHours();
+  if (hour < 12) return { text: "Good morning", Icon: Sun };
+  if (hour < 17) return { text: "Good afternoon", Icon: Sun };
+  return { text: "Good evening", Icon: Moon };
+}
+
+function Trend({ value, className = "" }) {
   return (
-    <PageShell title="Overview" sub="Wednesday, 16 July 2026 · Welcome back, Rashmi 👋"
-      action={
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[var(--zp-on-accent)] text-[12.5px] font-semibold shadow-md hover:shadow-lg transition-all"
-          style={{ background: `linear-gradient(135deg,${P.teal},${P.tealDark})` }}>
-          <Download size={14} />Export Report
-        </button>
-      }>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
-        <KpiCard icon={Users} label="Total Clients" value="24,891" sub="+312 this week" trend={5.8} color={P.teal} gradient />
-        <KpiCard icon={UserCheck} label="Active Experts" value="1,247" sub="94.2% verified" trend={3.2} color={P.emerald} gradient />
-        <KpiCard icon={Activity} label="Sessions Today" value="3,892" sub="avg 42 min/session" trend={8.4} color={P.violet} gradient />
-        <KpiCard icon={DollarSign} label="Revenue MTD" value="₹1.84Cr" sub="92% of ₹2Cr target" trend={12.1} color={P.amber} gradient />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <KpiCard icon={Briefcase} label="EAP Companies" value="48" sub="4,520 members" trend={6.3} color={P.teal} />
-        <KpiCard icon={Star} label="Expert Rating" value="4.72★" sub="184K reviews" trend={1.2} color={P.amber} />
-        <KpiCard icon={MessageSquare} label="Open Tickets" value="23" sub="Avg response 1.4h" trend={-18.2} color={P.rose} />
-        <KpiCard icon={TrendingUp} label="Conversion" value="8.4%" sub="Install → paid" trend={0.9} color={P.emerald} />
-      </div>
+    <span className={`inline-flex items-center gap-1 font-semibold text-[var(--zp-emerald)] ${className}`}>
+      <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.2} aria-hidden="true" />
+      {value}%
+    </span>
+  );
+}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
-        <Card className="col-span-1 xl:col-span-2 p-6">
-          <SectionHeader title="Platform Growth" sub="Monthly active users — all segments"
-            right={<select className="text-[11px] rounded-lg px-2.5 py-1.5 focus:outline-none" style={{ border: `1px solid ${P.border}`, color: P.slate, background: P.surface }}>
-              <option>Last 12 months</option><option>Last 6 months</option>
-            </select>} />
-          <ResponsiveContainer width="100%" height={230}>
-            <AreaChart data={monthlyGrowth} margin={{ top: 2, right: 2, left: -22, bottom: 0 }}>
-              <defs>
-                {[["gc", A.teal], ["ge", A.emerald], ["ga", A.amber]].map(([id, c]) => (
-                  <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={c} stopOpacity={0.2} /><stop offset="95%" stopColor={c} stopOpacity={0} />
-                  </linearGradient>
-                ))}
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={A.grid} />
-              <XAxis dataKey="m" tick={{ fontSize: 11, fill: A.slateLight }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: A.slateLight }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-              <Tooltip contentStyle={tipStyle} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-              <Area type="monotone" dataKey="c" name="Clients" stroke={A.teal} strokeWidth={2.5} fill="url(#gc)" />
-              <Area type="monotone" dataKey="eap" name="EAP Members" stroke={A.amber} strokeWidth={2.5} fill="url(#ga)" />
-              <Area type="monotone" dataKey="e" name="Experts" stroke={A.emerald} strokeWidth={2.5} fill="url(#ge)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+function HeroSection({ firstName, onInvite }) {
+  const { text, Icon } = greetingFor(new Date());
 
-        <Card className="p-6">
-          <SectionHeader title="User Distribution" sub="30,658 total accounts" />
-          <ResponsiveContainer width="100%" height={165}>
-            <RPie>
-              <Pie data={userDist} cx="50%" cy="50%" innerRadius={48} outerRadius={74} paddingAngle={4} dataKey="value" stroke="none">
-                {userDist.map((d, i) => <Cell key={i} fill={A[d.tone]} />)}
-              </Pie>
-              <Tooltip contentStyle={tipStyle} formatter={(v) => [v.toLocaleString(), ""]} />
-            </RPie>
-          </ResponsiveContainer>
-          <div className="space-y-2.5 mt-2">
-            {userDist.map(d => (
-              <div key={d.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ background: P[d.tone] }} />
-                  <span className="text-[12px]" style={{ color: P.slate }}>{d.name}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[12.5px] font-bold text-[var(--zp-navy)]" style={{ fontFamily: "'IBM Plex Sans',sans-serif" }}>{d.value.toLocaleString()}</span>
-                  <span className="text-[10px] ml-1.5" style={{ color: P.slateLight }}>{((d.value / 30658) * 100).toFixed(1)}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
-        <Card className="p-6">
-          <SectionHeader title="Daily Sessions" sub="This week — total vs completed" />
-          <ResponsiveContainer width="100%" height={195}>
-            <BarChart data={weekSessions} margin={{ top: 2, right: 2, left: -22, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={A.grid} vertical={false} />
-              <XAxis dataKey="d" tick={{ fontSize: 11, fill: A.slateLight }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: A.slateLight }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-              <Tooltip contentStyle={tipStyle} />
-              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 10 }} />
-              <Bar dataKey="total" name="Total" fill={A.tealLight} radius={[5, 5, 0, 0]} />
-              <Bar dataKey="done" name="Completed" fill={A.teal} radius={[5, 5, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-        <Card className="p-6">
-          <SectionHeader title="Expert Specialties" sub="Sessions by category this week" />
-          <ResponsiveContainer width="100%" height={195}>
-            <BarChart data={expertCats} layout="vertical" margin={{ top: 2, right: 20, left: 62, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={A.grid} horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: A.slateLight }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-              <YAxis type="category" dataKey="cat" tick={{ fontSize: 11, fill: A.slate }} axisLine={false} tickLine={false} width={58} />
-              <Tooltip contentStyle={tipStyle} />
-              <Bar dataKey="sessions" name="Sessions" fill={A.teal} radius={[0, 5, 5, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
-
-      <Card className="p-6">
-        <SectionHeader title="Recent Registrations" sub="Latest client accounts"
-          right={<button className="text-[12.5px] font-semibold flex items-center gap-1" style={{ color: P.teal }}>View all <ArrowRight size={13} /></button>} />
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <TableHeader cols={["User", "Plan", "Zodiac Sign", "Sessions", "Joined", "Status", ""]} />
-            <tbody>
-              {clients.map((u, i) => (
-                <tr key={u.id} className="hover:bg-[var(--zp-hover)] transition-colors"
-                  style={{ borderBottom: i < clients.length - 1 ? `1px solid ${P.border}` : "none" }}>
-                  <td className="py-3 pr-4">
-                    <div className="flex items-center gap-2.5">
-                      <InitialsAvatar name={u.name} idx={i} />
-                      <div><div className="text-[12.5px] font-semibold text-[var(--zp-navy)]">{u.name}</div><div className="text-[10.5px]" style={{ color: P.slateLight }}>{u.email}</div></div>
-                    </div>
-                  </td>
-                  <td className="py-3 pr-4"><span className="text-[10.5px] font-semibold px-2 py-0.5 rounded-full" style={{ background: P.tealLight, color: P.teal }}>{u.plan}</span></td>
-                  <td className="py-3 pr-4 text-[12.5px]" style={{ color: P.slate }}>{u.sign}</td>
-                  <td className="py-3 pr-4 text-[12.5px] font-bold text-[var(--zp-navy)]" style={{ fontFamily: "'IBM Plex Sans',sans-serif" }}>{u.sessions}</td>
-                  <td className="py-3 pr-4 text-[11px]" style={{ color: P.slateLight }}>{u.joined}</td>
-                  <td className="py-3 pr-4"><StatusBadge s={u.status} /></td>
-                  <td className="py-3"><button style={{ color: P.slateLight }} className="hover:text-[var(--zp-navy)] transition-colors"><MoreHorizontal size={15} /></button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  return (
+    <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,528fr)_minmax(0,786fr)] xl:gap-0">
+      <div className="xl:pl-5 xl:pt-2.5">
+        <p className="flex items-center gap-2 text-[15px] font-medium text-[var(--zp-navy)]">
+          <Icon className="h-4 w-4 text-[var(--zp-amber)]" strokeWidth={2} aria-hidden="true" />
+          {text}, {firstName}
+        </p>
+        <h1 className="mt-2 text-[28px] font-semibold leading-[1.15] tracking-[-0.02em] text-[var(--zp-navy)] sm:text-[34px]">
+          A healthier workplace <br className="hidden sm:block" />
+          builds brighter futures.
+        </h1>
+        <p className="mt-3 text-[15px] leading-[24.5px] text-[var(--zp-slate)] sm:text-[16px]">
+          Your EAP program is creating positive change. <br className="hidden sm:block" />
+          Here&apos;s what&apos;s happening across your organization.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3 sm:gap-5">
+          <button type="button" onClick={onInvite} className={`${primaryButton} h-[43px] px-[26px] text-[15px]`}>
+            Invite Employees
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          {/* TODO: open the overview video once it is available. */}
+          <button type="button"
+            className="inline-flex h-[43px] items-center gap-3 rounded-lg border border-[var(--zp-border)] bg-[var(--zp-card)] px-5 text-[15px] font-medium text-[var(--zp-navy)] shadow-[0_1px_2px_var(--zp-shadow)] transition-colors hover:bg-[var(--zp-hover)]">
+            <CirclePlay className="h-[22px] w-[22px] text-[var(--zp-navy)]" strokeWidth={1.5} aria-hidden="true" />
+            Watch Overview
+          </button>
         </div>
-      </Card>
-    </PageShell>
+      </div>
+
+      {/* Scenery is a CSS stand-in until the photograph is added — see .zp-dash-hero-photo. */}
+      <figure className="zp-dash-hero-photo relative aspect-[4/3] overflow-hidden rounded-[14px] sm:aspect-[786/300] xl:aspect-[786/256]">
+        <blockquote className="absolute left-[41px] top-[20%] max-w-[60%] pl-[0.45em] -indent-[0.45em] font-['Playfair_Display',serif] text-[18px] leading-[1.26] text-[#3a3f4b] sm:text-[21px]">
+          “People do their <br />best work when <br />they feel supported.”
+        </blockquote>
+        <figcaption className="absolute bottom-[14%] left-[50px] text-[9px] font-semibold uppercase tracking-[0.55em] text-[#555a66]">
+          <span aria-hidden="true" className="mb-[22px] block h-px w-[26px] bg-[#8a8f99]" />
+          ZodiacPluss
+        </figcaption>
+        <p className="absolute bottom-[9%] right-10 hidden text-right text-[8px] font-medium uppercase leading-[16px] tracking-[0.5em] text-white/90 sm:block">
+          People<br />Wellbeing<br />Progress
+          <span aria-hidden="true" className="ml-auto mt-[13px] block h-px w-5 bg-white/70" />
+        </p>
+      </figure>
+    </section>
+  );
+}
+
+// ─── Program health ───────────────────────────────────────────────────────────
+function HealthRing({ score, change }) {
+  return (
+    <ProgressRing value={score} gradient label={`Program health ${score}%`}>
+      <span className="text-[40px] font-semibold leading-none tracking-[-0.02em] text-[var(--zp-navy)]">{score}%</span>
+      <span className="mt-3 text-[14px] font-medium text-[var(--zp-navy)]">Program Health</span>
+      <Trend value={change} className="mt-2.5 text-[15px]" />
+      <span className="mt-1.5 text-[12px] text-[var(--zp-slate-light)]">vs. last month</span>
+    </ProgressRing>
+  );
+}
+
+function RangeSelect({ value, options, onChange }) {
+  return (
+    <label className="relative inline-flex shrink-0 items-center">
+      <span className="sr-only">Period</span>
+      <CalendarDays className="pointer-events-none absolute left-3 h-4 w-4 text-[var(--zp-slate)]" strokeWidth={1.7} aria-hidden="true" />
+      <select value={value} onChange={(e) => onChange(e.target.value)}
+        className="h-[27px] appearance-none rounded-md bg-[var(--zp-surface)] pl-9 pr-8 text-[12px] font-medium text-[var(--zp-navy)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--zp-brand)]/25">
+        {options.map((option) => <option key={option}>{option}</option>)}
+      </select>
+      <ChevronDown className="pointer-events-none absolute right-2.5 h-3.5 w-3.5 text-[var(--zp-slate)]" aria-hidden="true" />
+    </label>
+  );
+}
+
+function ProgramHealthCard() {
+  const { score, change, ranges, metrics } = PROGRAM_HEALTH;
+  // Held here so the period can drive the API query once it is connected.
+  const [range, setRange] = useState(ranges[0]);
+
+  return (
+    <Card className="px-5 pb-[23px] pt-4 sm:pl-[21px] sm:pr-[35px]">
+      <SectionHeader large title="Program Health" sub="A real-time view of your organization's EAP journey."
+        right={<RangeSelect value={range} options={ranges} onChange={setRange} />} />
+
+      <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-[64px] sm:pl-3 sm:pt-[3px]">
+        <HealthRing score={score} change={change} />
+
+        <ul className="w-full min-w-0 flex-1">
+          {metrics.map(({ label, value, change: delta, icon: Icon }) => (
+            <li key={label} className="flex items-center gap-[34px]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--zp-brand)]/[0.07] text-[var(--zp-brand-deep)]">
+                <Icon className="h-[18px] w-[18px]" strokeWidth={1.7} aria-hidden="true" />
+              </span>
+              <div className="flex min-w-0 flex-1 items-center justify-between gap-3 border-b border-[var(--zp-border)] py-[6px] [li:last-child_&]:border-b-0">
+                <div className="min-w-0">
+                  <p className="text-[19px] font-semibold leading-[22px] tracking-[-0.01em] text-[var(--zp-navy)]">{formatCount(value)}</p>
+                  <p className="truncate text-[13.5px] leading-[20px] text-[var(--zp-slate-light)]">{label}</p>
+                </div>
+                <Trend value={delta} className="text-[14px]" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Key milestones ───────────────────────────────────────────────────────────
+function KeyMilestonesCard() {
+  const lastIndex = MILESTONES.length - 1;
+
+  return (
+    <Card className="px-5 pb-[9px] pt-4 sm:pr-9">
+      <SectionHeader large title="Key Milestones" sub="Track progress across your EAP program." />
+
+      <ol className="-mt-3">
+        {MILESTONES.map(({ title, detail, note, status, reached }, index) => (
+          <li key={title} className="relative grid grid-cols-[32px_minmax(0,1fr)_auto] gap-x-3 pb-[11px] last:pb-0 sm:grid-cols-[54px_minmax(0,1fr)_auto] sm:gap-x-[25px]">
+            {/* Connector to the next marker: solid for the completed stretch. */}
+            {index < lastIndex && (
+              <span aria-hidden="true"
+                className={`absolute left-[15px] top-[10px] h-full w-[2px] sm:left-[26px] ${index === 0 ? "bg-[var(--zp-brand)]/60" : "bg-[var(--zp-brand)]/20"}`} />
+            )}
+            <span aria-hidden="true" className="relative flex h-[18px] items-center justify-center">
+              <span className={reached
+                ? "h-[14px] w-[14px] rounded-full bg-[var(--zp-brand)] ring-4 ring-[var(--zp-brand)]/15"
+                : "h-[11px] w-[11px] rounded-full bg-[var(--zp-brand)]/35"} />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[14px] font-semibold leading-[18px] text-[var(--zp-navy)]">{title}</p>
+              <p className="text-[13px] leading-[18px] text-[var(--zp-slate)]">{detail}</p>
+              <p className="text-[12.5px] leading-[18px] text-[var(--zp-slate-light)]">{note}</p>
+            </div>
+            <StatusBadge s={status} className="mt-[-1px] h-[21px] w-[72px] justify-center self-start rounded-[5px] border-0 px-0 text-[11.5px] font-medium" />
+          </li>
+        ))}
+      </ol>
+    </Card>
+  );
+}
+
+// ─── Partnership ──────────────────────────────────────────────────────────────
+function PartnershipCard({ onExplore }) {
+  return (
+    <Card className="relative overflow-hidden bg-[linear-gradient(105deg,color-mix(in_srgb,var(--zp-brand)_12%,var(--zp-card))_0%,color-mix(in_srgb,var(--zp-brand)_6%,var(--zp-card))_48%,var(--zp-card)_78%)]">
+      {/* Wide arc and building: CSS stand-ins until the photograph is added — see .zp-dash-partner-art. */}
+      <div aria-hidden="true" className="pointer-events-none absolute -right-[14%] -top-[70%] hidden aspect-square w-[62%] rounded-full bg-[var(--zp-card)]/55 md:block" />
+      <div aria-hidden="true" className="zp-dash-partner-art pointer-events-none absolute bottom-0 left-[38%] hidden h-[64%] w-[30%] md:block" />
+
+      <div className="relative grid grid-cols-1 gap-6 px-[22px] pb-[10px] pt-[18px] md:grid-cols-[minmax(0,1fr)_minmax(0,240px)] md:gap-4 md:pr-[34px]">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--zp-slate)]">Our Partnership</p>
+          <h2 className="mt-[5px] text-[24px] font-semibold leading-[1.18] tracking-[-0.02em] text-[var(--zp-navy)] sm:text-[28px]">
+            Stronger people. <br />Brighter workplaces.
+          </h2>
+          <p className="mt-1.5 max-w-[340px] text-[13px] leading-[19px] text-[var(--zp-slate-light)]">
+            Together, we&apos;re building healthier, more resilient teams for a better tomorrow.
+          </p>
+          <button type="button" onClick={onExplore} className={`${primaryButton} mt-[9px] h-8 px-5 text-[13px]`}>
+            Explore Programs
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
+
+        <ul className="flex flex-col gap-[18px] self-center pb-2.5">
+          {PARTNERSHIP_BENEFITS.map(({ title, detail, icon: Icon }) => (
+            <li key={title} className="flex items-center gap-[19px]">
+              <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-[var(--zp-card)] text-[var(--zp-brand)] shadow-[0_2px_8px_var(--zp-shadow)]">
+                <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold leading-[18px] text-[var(--zp-navy)]">{title}</p>
+                <p className="text-[11.5px] leading-[18px] text-[var(--zp-slate-light)]">{detail}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Card>
+  );
+}
+
+// ─── Upcoming actions ─────────────────────────────────────────────────────────
+function UpcomingActionsCard({ onOpen }) {
+  return (
+    <Card className="px-5 pb-2 pt-3.5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[18px] font-semibold tracking-[-0.01em] text-[var(--zp-navy)]">Upcoming Actions</h2>
+        {/* TODO: link to the full actions list once that page exists. */}
+        <button type="button" className="inline-flex items-center gap-1.5 text-[12.5px] font-medium text-[var(--zp-brand-deep)] hover:underline">
+          View all <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </div>
+
+      <ul className="mt-1">
+        {UPCOMING_ACTIONS.map(({ id, title, detail, icon: Icon, tone, target }) => (
+          <li key={id}>
+            <button type="button" onClick={() => onOpen(target)}
+              className="group flex w-full items-center gap-[25px] rounded-lg text-left">
+              <span className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg ${TONE_CLASSES[tone]}`}>
+                <Icon className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              <span className="flex min-w-0 flex-1 items-center gap-3 border-b border-[var(--zp-border)] py-[7px] [li:last-child_&]:border-b-0">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-semibold leading-[17px] text-[var(--zp-navy)] group-hover:text-[var(--zp-brand-deep)]">{title}</span>
+                  <span className="block truncate text-[12px] leading-[17px] text-[var(--zp-slate-light)]">{detail}</span>
+                </span>
+                <ChevronRight className="mr-1.5 h-4 w-4 shrink-0 text-[var(--zp-slate)]" aria-hidden="true" />
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+export default function DashboardOverviewPage({ profile, onNavigate = () => {} }) {
+  const firstName = (profile?.name || "there").split(" ")[0];
+
+  return (
+    <div className="zp-font flex flex-col gap-[18px]">
+      <HeroSection firstName={firstName} onInvite={() => onNavigate("employees")} />
+
+      <div className="grid grid-cols-1 gap-[18px] xl:grid-cols-[minmax(0,707fr)_minmax(0,583fr)] xl:gap-[22px]">
+        <ProgramHealthCard />
+        <KeyMilestonesCard />
+      </div>
+
+      <div className="grid grid-cols-1 gap-[18px] xl:grid-cols-[minmax(0,917fr)_minmax(0,374fr)] xl:gap-[21px]">
+        <PartnershipCard onExplore={() => onNavigate("programs")} />
+        <UpcomingActionsCard onOpen={onNavigate} />
+      </div>
+    </div>
   );
 }

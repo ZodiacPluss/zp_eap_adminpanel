@@ -76,6 +76,7 @@ export default function NotificationPanel({ onClose }) {
       <div className="max-h-[420px] overflow-y-auto">
         {notes.map(n => {
           const Icon = n.icon;
+          const accent = A[n.tone] ?? A.teal;
           return (
             <div key={n.id}
               className={`flex gap-3 px-5 py-3.5 cursor-pointer transition-all hover:bg-[var(--zp-hover)] ${!n.read ? "bg-[var(--zp-brand-soft)]" : ""}`}

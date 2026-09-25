@@ -191,3 +191,52 @@ select {
 * {
   scrollbar-color: var(--zp-border-strong) transparent;
 }
+
+/* Typeface of the redesigned shell and Home page (loaded in styles/fonts.css). */
+.zp-font {
+  font-family: 'Figtree', system-ui, sans-serif;
+}
+
+/*
+ * Home: hero banner scenery.
+ *
+ * TEMPORARY APPROXIMATION — the reference photograph (curved ceiling, mountain
+ * view, olive tree, wood-slat wall) is not in the repository yet. To use it,
+ * add the image under src/assets and replace these layers with
+ * `url(...) center / cover no-repeat`.
+ */
+.zp-dash-hero-photo {
+  background-color: #e8e4de;
+  background-image:
+    /* curved ceiling edge sweeping across the top */
+    radial-gradient(160% 120% at 12% 118%, transparent 70%, rgba(120, 112, 104, 0.35) 70.3%, #d8d2ca 71%, #cfc8bf 100%),
+    /* warm wall light behind the wood slats */
+    linear-gradient(90deg, transparent 62%, rgba(58, 40, 28, 0.35) 64%, transparent 66%),
+    /* hazy mountains along the bottom left */
+    radial-gradient(70% 45% at 22% 108%, #a9adb3 0%, #bfc2c6 45%, transparent 72%),
+    radial-gradient(55% 35% at 48% 104%, #b7b6b4 0%, transparent 70%),
+    /* wood slats on the right */
+    repeating-linear-gradient(90deg, #6e4c33 0 6px, #8c6547 6px 15px),
+    /* soft sky */
+    linear-gradient(180deg, #f2efea 0%, #ebe7e1 60%, #dcd7d0 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 34% 100%, 100% 100%;
+  background-position: 0 0, 0 0, 0 0, 0 0, 100% 0, 0 0;
+  background-repeat: no-repeat;
+}
+
+/*
+ * Home: partnership card artwork — a glass building corner under a wide arc.
+ *
+ * TEMPORARY APPROXIMATION of the reference's architectural photograph; replace
+ * with the real image the same way as the hero above.
+ */
+.zp-dash-partner-art {
+  background-image:
+    /* glass façade: mullions over a cool gradient */
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.55) 0 2px, transparent 2px 38px),
+    linear-gradient(160deg, #dfe6ee 0%, #b9c6d3 55%, #9aa9b8 100%);
+  background-size: 62% 70%, 62% 70%;
+  background-position: 100% 100%, 100% 100%;
+  background-repeat: no-repeat;
+  clip-path: polygon(38% 100%, 38% 52%, 100% 30%, 100% 100%);
+}

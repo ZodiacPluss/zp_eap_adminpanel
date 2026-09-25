@@ -38,4 +38,4 @@ export const fmtINR = (n) => {
     : `${pre}${a}`;
 };
 
-export const SIDEBAR_W = 272;
+export const SIDEBAR_W = 240;
