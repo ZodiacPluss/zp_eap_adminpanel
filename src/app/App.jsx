@@ -20,6 +20,9 @@ import DashboardOverviewPage from "@/app/pages/dashboard/DashboardOverviewPage";
 import ClientsManagementPage from "@/app/pages/dashboard/ClientsManagementPage";
 import EmployeesManagementPage from "@/app/pages/dashboard/EmployeesManagementPage";
 import ProgramsPage from "@/app/pages/dashboard/ProgramsPage";
+import ReportsPage from "@/app/pages/dashboard/ReportsPage";
+import ResourcesPage from "@/app/pages/dashboard/ResourcesPage";
+import DepartmentsPage from "@/app/pages/dashboard/DepartmentsPage";
 import ContactSupportDialog from "@/app/components/support/ContactSupportDialog";
 import ExpertsManagementPage from "@/app/pages/dashboard/ExpertsManagementPage";
 import EAPCalendarPage from "@/app/pages/dashboard/EAPCalendarPage";
@@ -64,16 +67,17 @@ const ComingSoon = ({ title }) => {
 const SEARCH_PLACEHOLDERS = {
   employees: "Search by name, email or employee ID...",
   programs: "Search by name, email or employee ID...",
+  reports: "Search by name, email or employee ID...",
+  resources: "Search resources, topics or keywords...",
+  departments: "Search by department, manager or keyword...",
 };
 
 // Pages rebuilt from the new designs; the legacy floating quick-action button is not part of them.
-const REDESIGNED_PAGES = new Set(["dashboard", "employees", "programs"]);
+const REDESIGNED_PAGES = new Set(["dashboard", "employees", "programs", "reports", "resources", "departments"]);
 
 const PAGES = {
   assessments: <ComingSoon title="Assessments" />,
-  departments: <ComingSoon title="Departments" />,
   organization: <ComingSoon title="Organization" />,
-  resources: <ComingSoon title="Resources" />,
   clients: <ClientsManagementPage />,
   experts: <ExpertsManagementPage />,
   eap: <EAPCalendarPage />,
@@ -83,7 +87,6 @@ const PAGES = {
   adminteam: <AdminTeamManagementPage />,
   support: <SupportInboxPage />,
   pricing: <ComingSoon title="Pricing" />,
-  reports: <ComingSoon title="Reports" />,
   ui: <ComingSoon title="UI Elements" />,
   table: <ComingSoon title="Data Table" />,
 };
@@ -98,6 +101,10 @@ export default function App() {
   const [supportOpen, setSupportOpen] = useState(false);
   // Header search runs against the employee directory; `id` lets the same query be sent twice.
   const [employeeSearch, setEmployeeSearch] = useState(null);
+  // The same, for the resources library, which the header searches while it is open.
+  const [resourceSearch, setResourceSearch] = useState(null);
+  // And for the departments directory, which the header also searches in place.
+  const [departmentSearch, setDepartmentSearch] = useState(null);
 
   // Authentication State
   const [user, setUser] = useState(null);
@@ -158,6 +165,16 @@ export default function App() {
   const ml = isMobile ? 0 : (collapsed ? 0 : SIDEBAR_W);
 
   const handleGlobalSearch = (query) => {
+    // The resources library owns the header search while it is the open page;
+    // everywhere else the header searches the employee directory.
+    if (active === "resources") {
+      setResourceSearch({ query, id: Date.now() });
+      return;
+    }
+    if (active === "departments") {
+      setDepartmentSearch({ query, id: Date.now() });
+      return;
+    }
     setEmployeeSearch({ query, id: Date.now() });
     setActive("employees");
   };
@@ -167,6 +184,9 @@ export default function App() {
       case "dashboard": return <DashboardOverviewPage profile={profile} onNavigate={setActive} />;
       case "employees": return <EmployeesManagementPage onNavigate={setActive} searchRequest={employeeSearch} />;
       case "programs": return <ProgramsPage onNavigate={setActive} onContactSupport={() => setSupportOpen(true)} />;
+      case "reports": return <ReportsPage />;
+      case "resources": return <ResourcesPage searchRequest={resourceSearch} />;
+      case "departments": return <DepartmentsPage onNavigate={setActive} searchRequest={departmentSearch} />;
       case "profile": return <AdminProfilePage profile={profile} onEdit={() => setActive("settings")} />;
       case "settings": return <SettingsConfigPage profile={profile} onSave={handleProfileSave} />;
       default: return PAGES[active] ?? <DashboardOverviewPage profile={profile} onNavigate={setActive} />;

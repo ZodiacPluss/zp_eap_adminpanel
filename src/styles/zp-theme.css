@@ -240,3 +240,83 @@ select {
   background-repeat: no-repeat;
   clip-path: polygon(38% 100%, 38% 52%, 100% 30%, 100% 100%);
 }
+
+/*
+ * Resources: hero and card artwork.
+ *
+ * TEMPORARY APPROXIMATIONS of the reference photographs, in the same spirit as
+ * `.zp-dash-hero-photo` above. Each item in `resourcesData` names one of these
+ * through its `art` key; set `image` on the item instead and the real
+ * photograph takes over, after which the matching class can be deleted.
+ */
+
+/* Balanced stones on a rock, over a misty lake and mountains. */
+.zp-res-hero-art {
+  background-color: #dbe7f0;
+  background-image:
+    /* the cairn: five stones, largest at the base */
+    radial-gradient(ellipse 5% 3.2% at 50% 30%, #b9b3ab 0 78%, transparent 80%),
+    radial-gradient(ellipse 7% 4% at 50% 40%, #a8a29a 0 78%, transparent 80%),
+    radial-gradient(ellipse 9.5% 5% at 50% 52%, #9c968e 0 78%, transparent 80%),
+    radial-gradient(ellipse 12% 5.5% at 50% 65%, #8d8880 0 78%, transparent 80%),
+    /* the boulder it rests on */
+    radial-gradient(ellipse 22% 16% at 50% 90%, #7c766e 0 72%, transparent 74%),
+    /* far mountains */
+    radial-gradient(60% 34% at 12% 104%, #b7c6d4 0 55%, transparent 76%),
+    radial-gradient(52% 28% at 86% 102%, #c2cfdb 0 55%, transparent 76%),
+    /* haze over the water */
+    linear-gradient(180deg, transparent 58%, rgba(255, 255, 255, 0.55) 78%, rgba(255, 255, 255, 0.2) 100%),
+    /* sky */
+    linear-gradient(180deg, #eef5fa 0%, #d9e8f3 55%, #cfe0ee 100%);
+  background-repeat: no-repeat;
+}
+
+/* Card: a seedling catching warm low light. */
+.zp-res-art-seedling {
+  background-color: #dcd6c6;
+  background-image:
+    radial-gradient(ellipse 14% 9% at 46% 44%, #6fa14a 0 72%, transparent 74%),
+    radial-gradient(ellipse 13% 8% at 60% 52%, #83b357 0 72%, transparent 74%),
+    linear-gradient(178deg, transparent 56%, #4e7a3a 56.6%, #4e7a3a 58.6%, transparent 59.2%),
+    radial-gradient(38% 30% at 78% 18%, rgba(255, 236, 190, 0.9) 0 60%, transparent 78%),
+    linear-gradient(180deg, #e7e0cd 0%, #cfc7b2 62%, #9d9684 62%, #8f8b74 100%);
+  background-repeat: no-repeat;
+}
+
+/* Card: a figure seated at a still lake, mountains behind. */
+.zp-res-art-lake {
+  background-color: #c9d8e4;
+  background-image:
+    radial-gradient(ellipse 4% 9% at 50% 62%, #33415a 0 74%, transparent 76%),
+    radial-gradient(ellipse 2.2% 4% at 50% 50%, #33415a 0 74%, transparent 76%),
+    radial-gradient(64% 40% at 18% 96%, #8ea3b6 0 55%, transparent 78%),
+    radial-gradient(56% 34% at 84% 94%, #a3b6c6 0 55%, transparent 78%),
+    linear-gradient(180deg, transparent 68%, #b6c8d6 68.5%, #9fb4c6 100%),
+    linear-gradient(180deg, #e3eef5 0%, #c8dae7 60%, #b9cedd 100%);
+  background-repeat: no-repeat;
+}
+
+/* Card: an open notebook on a pale desk. */
+.zp-res-art-notebook {
+  background-color: #e6e1d6;
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 11px, rgba(120, 130, 145, 0.28) 11px 12px),
+    linear-gradient(90deg, transparent 49.4%, rgba(140, 132, 118, 0.5) 49.4% 50.6%, transparent 50.6%),
+    linear-gradient(180deg, #fdfbf6 0%, #f4efe4 100%),
+    linear-gradient(140deg, #ded7c8 0%, #cec6b4 100%);
+  background-size: 62% 58%, 62% 58%, 62% 58%, 100% 100%;
+  background-position: 50% 46%, 50% 46%, 50% 46%, 0 0;
+  background-repeat: no-repeat;
+}
+
+/* Card: a studio microphone against a soft interior. */
+.zp-res-art-studio {
+  background-color: #dfe3e6;
+  background-image:
+    radial-gradient(ellipse 9% 16% at 50% 40%, #3f4650 0 76%, transparent 78%),
+    linear-gradient(180deg, transparent 56%, #555c66 56.4% 58.4%, transparent 58.8%),
+    radial-gradient(ellipse 13% 4% at 50% 78%, #4a515b 0 74%, transparent 76%),
+    radial-gradient(40% 46% at 12% 84%, rgba(126, 170, 120, 0.55) 0 55%, transparent 78%),
+    linear-gradient(180deg, #eef1f3 0%, #dde3e8 60%, #ccd4da 100%);
+  background-repeat: no-repeat;
+}

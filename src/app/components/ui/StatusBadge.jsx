@@ -33,9 +33,14 @@ const TONES = {
   Starter: "neutral",
 };
 
-export function StatusBadge({ s, className, dot = false }) {
+/**
+ * `tone` overrides the label-derived tone, for the few places where the same
+ * word carries a different weight — Departments shows "inactive" as a warning
+ * rather than the neutral it means in the platform tables.
+ */
+export function StatusBadge({ s, className, dot = false, tone: toneOverride }) {
   const A = useAccents();
-  const tone = TONES[s] ?? "neutral";
+  const tone = toneOverride ?? TONES[s] ?? "neutral";
   const accent = tone === "neutral" ? A.slate : A[tone];
 
   return (
