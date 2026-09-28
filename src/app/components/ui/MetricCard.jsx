@@ -8,7 +8,7 @@ import { useAccents } from "@/app/theme/ThemeProvider";
  * against the comparison window. Used by the KPI rows on Reports and
  * Departments.
  */
-export function MetricCard({ icon: Icon, label, value, change, comparison, tone = "brand" }) {
+export function MetricCard({ icon: Icon, label, value, change, comparison, tone = "brand", changeUnit = "%" }) {
   const A = useAccents();
   const accent = A[tone] ?? A.brand;
   const up = change >= 0;
@@ -26,7 +26,7 @@ export function MetricCard({ icon: Icon, label, value, change, comparison, tone 
         <p className="mt-1 truncate text-[13.5px] text-[var(--zp-slate)]">{label}</p>
         <p className="mt-2.5 flex items-center gap-1 text-[13.5px] font-semibold" style={{ color: trendColor }}>
           <Arrow className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden="true" />
-          {Math.abs(change)}%
+          {Math.abs(change)}{changeUnit}
         </p>
         <p className="mt-0.5 text-[12px] text-[var(--zp-slate-light)]">{comparison}</p>
       </div>

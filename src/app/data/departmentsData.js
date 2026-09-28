@@ -27,7 +27,7 @@ export const WELLBEING_TARGET = 4.05;
 export const WELLBEING_MAX = 5;
 
 export const DEPARTMENTS_SUMMARY = [
-  { id: "departments", label: "Total Departments", value: "8", change: 0, comparison: "vs. last quarter", icon: UsersRound, tone: "teal" },
+  { id: "departments", label: "Total Departments", value: "8", change: 0, changeUnit: "", comparison: "vs. last quarter", icon: UsersRound, tone: "teal" },
   { id: "employees", label: "Total Employees", value: "845", change: 12, comparison: "vs. last quarter", icon: UsersRound, tone: "emerald" },
   { id: "participation", label: "Avg. EAP Participation", value: "68%", change: 8, comparison: "vs. last quarter", icon: ChartNoAxesColumn, tone: "violet" },
   { id: "wellbeing", label: "Avg. Wellbeing Score", value: "4.2 / 5", change: 6, comparison: "vs. last quarter", icon: Star, tone: "amber" },

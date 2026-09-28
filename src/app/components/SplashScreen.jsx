@@ -1,10 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
+import wasmUrl from "@lottiefiles/dotlottie-web/dotlottie-player.wasm?url";
+import splashSrc from "@/assets/lottie/splash.lottie?url";
 import { usePalette, useTheme } from "@/app/theme/ThemeProvider";
 
-// splash.lottie is served from /public/lottie/ as a plain static URL —
-// no Vite import needed; this avoids WASM-loader issues in dev mode.
-const SPLASH_SRC = "/lottie/splash.lottie";
+/**
+ * The player fetches its WASM renderer at runtime and defaults to jsdelivr /
+ * unpkg. On a deployed site that cross-origin request is the slowest and least
+ * reliable part of the splash — if it is blocked or simply slower than the
+ * splash itself, the animation never appears. Pointing it at the copy Vite
+ * emits into our own bundle keeps it same-origin and versioned with the build.
+ */
+setWasmUrl(wasmUrl);
+
+// Imported through Vite (rather than read from /public) so the URL is
+// content-hashed: a redeploy with a new animation can no longer be masked by a
+// cached copy of the old one.
+const SPLASH_SRC = splashSrc;
+
+// If the renderer has not produced a frame by now, show the branded fallback
+// instead of an empty panel for the rest of the splash.
+const RENDER_TIMEOUT_MS = 1500;
 
 // ─── Main SplashScreen ───────────────────────────────────────────────────────
 export default function SplashScreen({ onComplete, minDuration = 3500 }) {
@@ -13,6 +29,28 @@ export default function SplashScreen({ onComplete, minDuration = 3500 }) {
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState("loading");
   const [lottieError, setLottieError] = useState(false);
+  const renderedRef = useRef(false);
+
+  // The player reports load and render failures through its own event emitter,
+  // not through DOM events, so the instance is wired up here.
+  const handleInstance = useCallback((dotLottie) => {
+    if (!dotLottie) return;
+    const fail = () => setLottieError(true);
+    const succeed = () => { renderedRef.current = true; };
+    dotLottie.addEventListener("render", succeed);
+    dotLottie.addEventListener("loadError", fail);
+    dotLottie.addEventListener("renderError", fail);
+  }, []);
+
+  // Nothing on screen after the grace period counts as a failure too: a WASM
+  // fetch that hangs never emits an error of its own.
+  useEffect(() => {
+    if (lottieError) return undefined;
+    const timer = setTimeout(() => {
+      if (!renderedRef.current) setLottieError(true);
+    }, RENDER_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [lottieError]);
 
   // Progress simulation
   useEffect(() => {
@@ -105,7 +143,7 @@ export default function SplashScreen({ onComplete, minDuration = 3500 }) {
                 loop
                 autoplay
                 style={{ width: "100%", height: "auto" }}
-                onError={() => setLottieError(true)}
+                dotLottieRefCallback={handleInstance}
               />
             </div>
           ) : (

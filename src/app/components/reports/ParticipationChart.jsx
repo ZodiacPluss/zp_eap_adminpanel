@@ -23,7 +23,10 @@ export function ParticipationChart({ participation }) {
                 startAngle={90} endAngle={-270} paddingAngle={1.5} stroke="none" isAnimationActive={false}>
                 {data.map((segment) => <Cell key={segment.id} fill={segment.color} />)}
               </Pie>
-              <Tooltip contentStyle={tipStyle} formatter={(value, name, entry) => [`${entry.payload.value} · ${value}%`, name]} />
+              <Tooltip contentStyle={tipStyle} formatter={(value, name, entry) => {
+                const segment = entry?.payload?.payload ?? entry?.payload ?? {};
+                return [`${segment.value ?? "-"} employees · ${value}%`, name];
+              }} />
             </PieChart>
           </ResponsiveContainer>
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
