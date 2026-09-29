@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "zodiacpluss-admin",
-  "compatibility_date": "2026-09-19",
+  "name": "zp-eap-adminpanel",
+  "compatibility_date": "2026-09-29",
   "assets": {
     "not_found_handling": "single-page-application"
   }

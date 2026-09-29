@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { SIDEBAR_W } from "@/app/data/designTokens";
 import { usePalette, useAccents } from "@/app/theme/ThemeProvider";
 import { useIsMobile } from "@/app/hooks/useResponsive";
+import useAuthSession from "@/app/hooks/useAuthSession";
 import { Card } from "@/app/components/ui/Card";
 import { PageShell } from "@/app/components/ui/PageShell";
 
@@ -14,6 +15,7 @@ import QuickActionButton from "@/app/components/layout/QuickActionButton";
 
 // ─── Authentication pages ─────────────────────────────────────────────────────
 import LoginPage from "@/app/pages/auth/LoginPage";
+import SsoCallbackScreen from "@/app/pages/auth/SsoCallbackScreen";
 
 // ─── Main private pages ───────────────────────────────────────────────────────
 import DashboardOverviewPage from "@/app/pages/dashboard/DashboardOverviewPage";
@@ -106,22 +108,9 @@ export default function App() {
   // And for the departments directory, which the header also searches in place.
   const [departmentSearch, setDepartmentSearch] = useState(null);
 
-  // Authentication State
-  const [user, setUser] = useState(null);
+  const { user, isCompletingSignIn, error: authError, logout } = useAuthSession();
 
   const isMobile = useIsMobile();
-
-  // Load session from local storage on mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem("zp_admin_session");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
-        localStorage.removeItem("zp_admin_session");
-      }
-    }
-  }, []);
 
   useEffect(() => {
     const savedProfile = localStorage.getItem("zp_admin_profile");
@@ -133,17 +122,6 @@ export default function App() {
       }
     }
   }, []);
-
-  const handleLogin = (authenticatedUser) => {
-    setUser(authenticatedUser);
-    localStorage.setItem("zp_admin_session", JSON.stringify(authenticatedUser));
-    setActive("dashboard");
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("zp_admin_session");
-  };
 
   const handleProfileSave = (nextProfile) => {
     setProfile(nextProfile);
@@ -197,9 +175,13 @@ export default function App() {
     return <SplashScreen onComplete={handleSplashComplete} minDuration={3500} />;
   }
 
+  if (isCompletingSignIn) {
+    return <SsoCallbackScreen />;
+  }
+
   // Admin access is intentionally limited to the sign-in entry point.
   if (!user) {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage initialError={authError} />;
   }
 
   return (
@@ -222,7 +204,7 @@ export default function App() {
       `}</style>
       <div className="min-h-screen" style={{ background: P.bg, fontFamily: "'Inter',system-ui,sans-serif" }}>
         <SidebarNav active={active} setActive={setActive} collapsed={collapsed} setCollapsed={setCollapsed} profile={profile} onContactSupport={() => setSupportOpen(true)} />
-        <TopNavHeader ml={ml} searchPlaceholder={SEARCH_PLACEHOLDERS[active]} onSearch={handleGlobalSearch} onToggleSidebar={() => setCollapsed(v => !v)} onNavigate={setActive} onLogout={handleLogout} profile={profile} />
+        <TopNavHeader ml={ml} searchPlaceholder={SEARCH_PLACEHOLDERS[active]} onSearch={handleGlobalSearch} onToggleSidebar={() => setCollapsed(v => !v)} onNavigate={setActive} onLogout={logout} profile={profile} />
         <main className="pt-16 transition-all duration-300 ease-in-out" style={{ marginLeft: ml }}>
           {/* Home sits flush under the header, as in its design. */}
           <div className={`${isMobile ? "p-4" : "p-7"} ${active === "dashboard" && !isMobile ? "pt-1 pb-4" : ""} max-w-[1600px] mx-auto`}>

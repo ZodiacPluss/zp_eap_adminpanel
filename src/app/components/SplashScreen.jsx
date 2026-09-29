@@ -93,15 +93,25 @@ export default function SplashScreen({ onComplete, minDuration = 3500 }) {
             <div
               style={{
                 width: "100%",
-                maxWidth: 360,
+                // Capped to the progress bar's 240px so the mark, the bar and
+                // the status line read as one column rather than a big logo
+                // with small controls under it. `vw` keeps it in proportion on
+                // narrow screens, where 240px would dominate the viewport.
+                maxWidth: "min(240px, 58vw)",
                 animation: "lottieReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
               }}
             >
+              {/*
+                The animation fills whatever box it is given, and `height: auto`
+                on that box resolves to zero — which renders nothing at all.
+                The aspect ratio is the animation's own 512x457, so the box
+                matches it at every width.
+              */}
               <Lottie
                 src={splashAnimation}
                 loop
                 autoplay
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", aspectRatio: "512 / 457" }}
               />
             </div>
           ) : (

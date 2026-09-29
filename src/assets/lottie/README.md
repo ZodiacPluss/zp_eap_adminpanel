@@ -1,24 +1,21 @@
 # Lottie Assets
 
-`splash.lottie` is the animation on the startup screen.
+`splash.json` is the animation on the startup screen.
 
 It is imported through Vite in `src/app/components/SplashScreen.jsx`:
 
 ```js
-import splashSrc from "@/assets/lottie/splash.lottie?url";
+import splashAnimation from "@/assets/lottie/splash.json";
 ```
 
-Replacing the animation means replacing **this** file — there is no second copy
-in `public/`. Because Vite emits it under a content-hashed name, a redeploy
-always serves the new animation; a cached copy of the old one cannot win.
+Replacing the animation means replacing **this** file. Because Vite bundles it
+into the build output, a redeploy always serves the new animation — a cached
+copy of the old one cannot win.
 
-> `.lottie` (dotLottie) files are played with `@lottiefiles/dotlottie-react`.
-> A plain `.json` (Lottie JSON) file would use `lottie-react` instead, which
-> needs no WASM renderer.
+The animation is 512x457; `SplashScreen.jsx` sets a matching `aspectRatio` on
+the player. Update that value if you swap in an animation of a different shape,
+otherwise the box collapses and nothing is drawn.
 
-## WASM renderer
-
-`@lottiefiles/dotlottie-react` downloads a ~1.2 MB WASM renderer at runtime and
-defaults to a public CDN. `SplashScreen.jsx` calls `setWasmUrl()` with the copy
-Vite bundles from `@lottiefiles/dotlottie-web`, so the deployed site never
-depends on that CDN being reachable.
+> `.json` (Lottie JSON) files are played with `lottie-react`, which needs no
+> WASM renderer and no CDN at runtime. `splash.lottie` is the same animation in
+> dotLottie form, kept only as a source file — nothing imports it.

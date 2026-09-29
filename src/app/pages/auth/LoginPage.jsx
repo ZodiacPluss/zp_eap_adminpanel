@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, ArrowRight, Eye, EyeOff, Info, LockKeyhole, Mail } from "lucide-react";
-import {
-  InvalidCredentialsError,
-  signInWithPassword,
-} from "@/app/services/auth";
+import { AlertCircle, ArrowRight, Info, LockKeyhole, Mail } from "lucide-react";
+import { describeAuthError, getCompanySignInUrl } from "@/app/services/auth";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -20,11 +17,10 @@ const FOOTER_LINKS = [
   { label: "Contact", href: "#contact" },
 ];
 
-export default function LoginPage({ onLogin }) {
+/** @param {{ initialError?: string }} props a failed SSO round trip lands here with its message */
+export default function LoginPage({ initialError = "" }) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(initialError);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -39,12 +35,6 @@ export default function LoginPage({ onLogin }) {
 
   const handleEmailChange = (event) => {
     setEmail(event.target.value);
-    setError("");
-    setNotice("");
-  };
-
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
     setError("");
     setNotice("");
   };
@@ -69,31 +59,15 @@ export default function LoginPage({ onLogin }) {
       return;
     }
 
-    if (!password) {
-      setError("Enter your password to continue.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const result = await signInWithPassword(normalizedEmail, password);
-
-      if (result.type === "redirect") {
-        window.location.assign(result.url);
-        return;
-      }
-
-      onLogin?.(result.user);
+      // Stays in the loading state while the browser leaves for the company's SSO.
+      window.location.assign(await getCompanySignInUrl(normalizedEmail));
     } catch (err) {
       if (!mountedRef.current) return;
-      setError(
-        err instanceof InvalidCredentialsError
-          ? err.message
-          : "We couldn't sign you in. Please try again."
-      );
-    } finally {
-      if (mountedRef.current) setLoading(false);
+      setError(describeAuthError(err));
+      setLoading(false);
     }
   };
 
@@ -189,9 +163,9 @@ export default function LoginPage({ onLogin }) {
             </h1>
 
             <p className="mt-4 text-[16px] leading-[1.6] text-[var(--zp-auth-body)] sm:text-[20.5px] sm:leading-[1.45]">
-              Use your work email and password to access{" "}
+              Use your work email to continue with your{" "}
               <br className="hidden sm:block" />
-              your organization&apos;s admin panel.
+              organization&apos;s single sign-on (SSO).
             </p>
           </header>
 
@@ -237,38 +211,6 @@ export default function LoginPage({ onLogin }) {
               />
             </div>
 
-            <label htmlFor="password" className="mt-[22px] block text-[16px] font-medium leading-5">
-              Password
-            </label>
-
-            <div className="mt-[9px] flex h-[50px] items-center gap-[19px] rounded-md border border-[var(--zp-auth-field-border)] bg-[var(--zp-auth-field)] px-[18px] transition focus-within:border-[var(--zp-auth-accent)] focus-within:ring-4 focus-within:ring-[var(--zp-auth-accent-ring)]">
-              <LockKeyhole className="h-5 w-5 shrink-0 text-[var(--zp-auth-body)]" strokeWidth={1.6} aria-hidden="true" />
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={handlePasswordChange}
-                disabled={loading}
-                aria-invalid={Boolean(error)}
-                className="h-full w-full min-w-0 bg-transparent text-[16px] text-[var(--zp-auth-ink)] outline-none placeholder:text-[var(--zp-auth-placeholder)] disabled:cursor-not-allowed disabled:opacity-60"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((visible) => !visible)}
-                disabled={loading}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-                aria-pressed={showPassword}
-                className="-mr-1 shrink-0 rounded p-1 text-[var(--zp-auth-body)] transition hover:text-[var(--zp-auth-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--zp-auth-accent)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {showPassword
-                  ? <EyeOff className="h-5 w-5" strokeWidth={1.6} aria-hidden="true" />
-                  : <Eye className="h-5 w-5" strokeWidth={1.6} aria-hidden="true" />}
-              </button>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -280,11 +222,11 @@ export default function LoginPage({ onLogin }) {
                     className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
                     aria-hidden="true"
                   />
-                  Signing in…
+                  Continuing…
                 </>
               ) : (
                 <>
-                  Sign In
+                  Continue
                   <ArrowRight className="h-[22px] w-[22px]" strokeWidth={1.8} aria-hidden="true" />
                 </>
               )}
